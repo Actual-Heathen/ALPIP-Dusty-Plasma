@@ -1,3 +1,5 @@
+#pragma once
+
 class Particle
 {
     public:
@@ -14,4 +16,5 @@ class Particle
         float x_pos;
         float y_pos;
         float mass;
+        float velocity;
 };

@@ -1,6 +1,9 @@
+#include "../headers/Particle.h"
+
 class Point
 {
     public:
+        Point();
         Point(float x, float y);
         void resetGVector();
         float getX();
@@ -8,10 +11,11 @@ class Point
         float getXGV();
         float getYGV();
         float getGVM();
+        void addGravity(Particle p);
     private:
         float x_pos;
         float y_pos;
-        float GXVector;
-        float GYVector;
-        float GVectorMagnitude;
+        float GXVector = 0;
+        float GYVector = 0;
+        float GVectorMagnitude = 0;
 };
