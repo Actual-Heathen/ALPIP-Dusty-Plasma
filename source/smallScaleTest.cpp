@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <iostream>
 #include <math.h>
-#include "basicFunctions.cpp"
 #include "../headers/Particle.h"
 #include "../headers/Point.h"
 
