@@ -4,34 +4,34 @@ class Particle
 {
     struct Vector
     {
-        float xVec = 0;
-        float yVec = 0;
-        float mag = 0;
+        long double xVec = 0;
+        long double yVec = 0;
+        long double mag = 0;
     };
 
     public:
         Particle();
-        Particle(float x, float y, float m);
-        float getX();
-        float getY();
-        float getMass();
-        float getSpeed();
-        void addAcceleration(float x, float y);
-        void move(float s);
+        Particle(long double x, long double y, long double m);
+        long double getX();
+        long double getY();
+        long double getMass();
+        long double getSpeed();
+        void addAcceleration(double rho[][3], double spacing);
+        void move(long double s);
         void resetAcc();
         void resetVel();
     private:
-        void setX(float x);
-        void setY(float y);
-        void setMass(float m);
+        void setX(long double x);
+        void setY(long double y);
+        void setMass(long double m);
 
-        float x_pos;
-        float y_pos;
-        float mass;
-        float speed = 0;
-        float velX = 0;
-        float velY = 0;
-        float accel = 0;
-        float accelX = 0;
-        float accelY = 0;
+        long double x_pos;
+        long double y_pos;
+        long double mass;
+        long double speed = 0;
+        long double velX = 0;
+        long double velY = 0;
+        long double accel = 0;
+        long double accelX = 0;
+        long double accelY = 0;
 };

@@ -10,46 +10,54 @@ Point::Point()
     y_pos = 0;
 }
 
-Point::Point(float x, float y)
+Point::Point(long double x, long double y)
 {
     x_pos = x;
     y_pos = y;
 }
 
-float Point::getX()
+long double Point::getX()
 {
     return x_pos;
 }
 
-float Point::getY()
+long double Point::getY()
 {
     return y_pos;
 }
 
-float Point::getXGV()
+long double Point::getXGV()
 {
     return GXVector;
 }
 
-float Point::getYGV()
+long double Point::getYGV()
 {
     return GYVector;
 }
 
-float Point::getGVM()
+long double Point::getGVM()
 {
     return GVectorMagnitude;
 }
 
 void Point::addGravity(Particle p)
 {
-    float dX = p.getX() - x_pos;
-    float dY = p.getY() - y_pos;
-    float distance = sqrt(pow(dX,2) + pow(dY,2));
-    float accel = G*p.getMass()/pow(distance,2);
+    long double dX = p.getX() - x_pos;
+    long double dY = p.getY() - y_pos;
+    long double distance = sqrt(pow(dX,2) + pow(dY,2));
+    long double accel = G*p.getMass()/pow(distance,2);
 
     GXVector += (dX*accel)/distance;
     GYVector += (dY*accel)/distance;
     GVectorMagnitude = sqrt(pow(GXVector,2) + pow(GYVector,2));
+
+}
+
+void Point::resetGVector()
+{
+    GXVector = 0;
+    GYVector = 0;
+    GVectorMagnitude = 0;
 
 }
