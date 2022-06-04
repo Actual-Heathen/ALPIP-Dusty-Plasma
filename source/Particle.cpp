@@ -1,5 +1,9 @@
 #include "../headers/Particle.h"
+#include "../headers/Point.h"
 #include <math.h>
+
+#define PI 3.14159265
+#define G 6.6743*pow(10,-11)
 
 Particle::Particle()
 {
@@ -8,70 +12,120 @@ Particle::Particle()
     setMass(0);
 }
 
-Particle::Particle(float x, float y, float m)
+Particle::Particle(long double x, long double y, long double m)
 {
     setX(x);
     setY(y);
     setMass(m);
 }
 
-void Particle::setX(float x)
+void Particle::setX(long double x)
 {
     x_pos = x;
 }
 
-void Particle::setY(float y)
+void Particle::setY(long double y)
 {
     y_pos = y;
 }
 
-void Particle::setMass(float m)
+void Particle::setMass(long double m)
 {
     mass = m;
 }
 
-float Particle::getX()
+long double Particle::getX()
 {
     return x_pos;
 }
 
-float Particle::getY()
+long double Particle::getY()
 {
     return y_pos;
 }
 
-float Particle::getMass()
+long double Particle::getMass()
 {
     return mass;
 }
-float Particle::getSpeed()
+long double Particle::getSpeed()
 {
     return speed;
 }
 
-void Particle::addAcceleration(float x, float y)
+void Particle::addAcceleration(double rho[][3], double spacing)
 {
-    accelX += x;
-    accelY += y;
-    accel = sqrt(pow(x,2) + pow(y,2));
+        int iXm = abs(floor(x_pos/spacing));
+        int iXp = iXm + 1;
+
+
+        int iYm = floor(y_pos/spacing);
+        int iYp = iYm + 1;
+
+        
+        //cout << iXp<< ", "<< wXp << "<-ixp "<< iYp << ", "<< wYp << "<-iyp\n";
+        //cout << iXm<< " ,"<< wXm << "<-ixm "<< iYm << ", "<< wYm << "<-iym\n";
+
+        double dX = iXm*spacing-x_pos;
+        double dY = iYm*spacing-y_pos;
+        double d = sqrt(dX*dX+dY*dY);
+        double psi = 4*PI*G*rho[iXm][iYm];
+        dX = (dX/d)*psi;
+        dY = (dY/d)*psi;
+
+        accelX += dX;
+        accelY += dY;
+
+        dX = iXm*spacing-x_pos;
+        dY = iYp*spacing-y_pos;
+        d = sqrt(dX*dX+dY*dY);
+        psi = 4*PI*G*rho[iXm][iYp];
+        dX = (dX/d)*psi;
+        dY = (dY/d)*psi;
+
+        accelX += dX;
+        accelY += dY;
+
+        dX = iXp*spacing-x_pos;
+        dY = iYm*spacing-y_pos;
+        d = sqrt(dX*dX+dY*dY);
+        psi = 4*PI*G*rho[iXp][iYm];
+        dX = (dX/d)*psi;
+        dY = (dY/d)*psi;
+
+        accelX += dX;
+        accelY += dY;
+
+        dX = iXp*spacing-x_pos;
+        dY = iYp*spacing-y_pos;
+        d = sqrt(dX*dX+dY*dY);
+        psi = 4*PI*G*rho[iXp][iYp];
+        dX = (dX/d)*psi;
+        dY = (dY/d)*psi;
+
+        accelX += dX;
+        accelY += dY;
 }
 
-void Particle::move(float s)
+void Particle::move(long double s)
 {
-    float dX = velX*s + .5*accelX*s*s;
-    float dY = velY*s + .5*accelY*s*s;
+    long double dX = velX*s + .5*accelX*s*s;
+    long double dY = velY*s + .5*accelY*s*s;
 
-    velX = dX;
-    velY = dY;
+    long double xV = dX/s;
+    long double yV = dY/s;
 
-    float xV = dX/s;
-    float yV = dY/s;
+    velX = xV;
+    velY = yV;
     speed = sqrt(xV*xV + yV*yV);
 
     x_pos += dX;
     y_pos += dY;
 
     resetAcc();
+    accelX = 0;
+    accelY = 0;
+    accel = 0;
 }
 
 void Particle::resetAcc()
