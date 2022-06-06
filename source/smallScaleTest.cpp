@@ -5,32 +5,34 @@
 #include "../headers/Particle.h"
 #include "../headers/Point.h"
 #include <vector>
+#include <fstream>
 
 using namespace std;
-#define paticleCount 1
+#define paticleCount 512*512*10
 //#define pointCount 2
-#define spacing .00001
-#define gridDiv 3
+#define spacing 1.0
+#define gridDiv 512
 
 int main()
 {
     srand(time(NULL));
-
+    ofstream data;
+    data.open("data.d");
     vector<Particle> dust;
     //Point points[pointCount];
 
-    double rho[gridDiv][gridDiv];
+    vector<vector<double>> rho(gridDiv, vector<double> (gridDiv));
 
-
+    cout << "declared\n";
     for (int i = 0; i < paticleCount; i++) //set particle position
     {
-        Particle temp( (double(rand())/double(RAND_MAX)*spacing*(gridDiv-1)), (double(rand())/double(RAND_MAX))*spacing*(gridDiv-1),1.0);
-
+        Particle temp( ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv), ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv),1.0);
+        //cout << temp.getX()<<temp.getY()<<"\n";
         dust.push_back(temp);
         //cout << dust[i].getX() << ", " << dust[i].getY() << "\n";
     }
 
-    for (int l = 0; l< 600; l++)
+    for (int l = 0; l< 1; l++)
     {
         for (int i = 0; i < gridDiv; i++)   //initialize grid
         {
@@ -38,20 +40,29 @@ int main()
             {
                 rho[i][j] = 0;
             }
+
         }
+        cout << "rho reset\n";
 
         for (int i = 0; i < paticleCount; i++) //calculate rho
         {
             int iXm = floor(dust[i].getX()/spacing);
             int iXp = iXm + 1;
-            double wXm = 1- abs((dust[i].getX()-iXm*spacing)/spacing);
-            double wXp = 1- abs((dust[i].getX()-iXp*spacing)/spacing);
-
+            double wXm = 1- abs((dust[i].getX()/spacing)-iXm);
+            double wXp = 1- abs((dust[i].getX()/spacing)-iXp);
+            if (iXp >= gridDiv)
+            {
+                iXp = iXp - gridDiv;
+            }
             int iYm = floor(dust[i].getY()/spacing);
             int iYp = iYm + 1;
-            double wYm = 1- abs((dust[i].getY()-iYm*spacing)/spacing);
-            double wYp = 1- abs((dust[i].getY()-iYp*spacing)/spacing);
-            
+         
+            double wYm = 1- abs((dust[i].getY()/spacing)-iYm);
+            double wYp = 1- abs((dust[i].getY()/spacing)-iYp);
+             if (iYp >= gridDiv)
+            {
+                iYp = iYp - gridDiv;
+            }            
             //cout << iXp<< ", "<< wXp << "<-ixp "<< iYp << ", "<< wYp << "<-iyp\n";
             //cout << iXm<< " ,"<< wXm << "<-ixm "<< iYm << ", "<< wYm << "<-iym\n";
 
@@ -61,6 +72,7 @@ int main()
             rho[iXp][iYp] += wXp*wYp;
         }
 
+        cout << "rho set\n";
         double rhoTemp = 0;
 
         for (int i = 0; i < gridDiv; i++)
@@ -69,17 +81,24 @@ int main()
             {
                 //cout << rho[i][j] << "\n";
                 rhoTemp += rho[i][j];
+                data << rho[i][j]<<"\n";
             }
         }
+        cout << "rho counted";
 
-        //cout << rhoTemp << " rho sum\n";
+        cout << rhoTemp << " rho sum\n";
 
+        int work_done = 0;
+
+        #pragma omp parallel for num_threads(6) schedule(static)
         for (int i = 0; i < paticleCount; i++) //calculate gravity
         {
-            dust[i].addAcceleration(rho,spacing);
-            dust[i].move(1);
+            dust[i].addAcceleration(spacing, rho);
+            dust[i].move(.01);
             if (i == 0)
-                cout<< dust[i].getX() << ", " << dust[i].getY() << "\n ";
+            {
+                //data<< dust[i].getX() << ", " << dust[i].getY() << "\n ";
+            }
             //if (i == 1)
             //    cout<< dust[i].getX() << ", " << dust[i].getY() << "\n ";
             // if (i == 2)
@@ -88,6 +107,15 @@ int main()
             //     cout<< dust[i].getX() << ", " << dust[i].getY() << ", ";
             // if (i == 4)
             //     cout<< dust[i].getX() << ", " << dust[i].getY() << "\n";
+            #pragma omp atomic
+            work_done++;
+            
+            if ((work_done % 1000) == 0)
+                cout <<"number "<< work_done << "counted\n";
         }
+        cout << "grav calc\n";
     }
+    dust.clear();
+    rho.clear();
+    data.close();
 }

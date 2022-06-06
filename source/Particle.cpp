@@ -1,6 +1,7 @@
 #include "../headers/Particle.h"
 #include "../headers/Point.h"
 #include <math.h>
+#include <vector>
 
 #define PI 3.14159265
 #define G 6.6743*pow(10,-11)
@@ -53,15 +54,22 @@ long double Particle::getSpeed()
     return speed;
 }
 
-void Particle::addAcceleration(double rho[][3], double spacing)
+void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> rho)
 {
         int iXm = abs(floor(x_pos/spacing));
         int iXp = iXm + 1;
+        if (iXp >= spacing*(rho.size()))
+        {
+            iXp = iXp-rho.size();
+        }
 
 
         int iYm = floor(y_pos/spacing);
         int iYp = iYm + 1;
-
+        if (iYp >= spacing*(rho.size()))
+        {
+            iYp = iYp-rho.size();
+        }
         
         //cout << iXp<< ", "<< wXp << "<-ixp "<< iYp << ", "<< wYp << "<-iyp\n";
         //cout << iXm<< " ,"<< wXm << "<-ixm "<< iYm << ", "<< wYm << "<-iym\n";
@@ -69,7 +77,7 @@ void Particle::addAcceleration(double rho[][3], double spacing)
         double dX = iXm*spacing-x_pos;
         double dY = iYm*spacing-y_pos;
         double d = sqrt(dX*dX+dY*dY);
-        double psi = 4*PI*G*rho[iXm][iYm];
+        double psi = (4*PI*G*rho[iXm][iYm])*exp(-2*d);
         dX = (dX/d)*psi;
         dY = (dY/d)*psi;
 
@@ -79,7 +87,7 @@ void Particle::addAcceleration(double rho[][3], double spacing)
         dX = iXm*spacing-x_pos;
         dY = iYp*spacing-y_pos;
         d = sqrt(dX*dX+dY*dY);
-        psi = 4*PI*G*rho[iXm][iYp];
+        psi = (4*PI*G*rho[iXm][iYp])*exp(-2*d);
         dX = (dX/d)*psi;
         dY = (dY/d)*psi;
 
@@ -89,7 +97,7 @@ void Particle::addAcceleration(double rho[][3], double spacing)
         dX = iXp*spacing-x_pos;
         dY = iYm*spacing-y_pos;
         d = sqrt(dX*dX+dY*dY);
-        psi = 4*PI*G*rho[iXp][iYm];
+        psi = (4*PI*G*rho[iXp][iYm])*exp(-2/d);
         dX = (dX/d)*psi;
         dY = (dY/d)*psi;
 
@@ -99,12 +107,29 @@ void Particle::addAcceleration(double rho[][3], double spacing)
         dX = iXp*spacing-x_pos;
         dY = iYp*spacing-y_pos;
         d = sqrt(dX*dX+dY*dY);
-        psi = 4*PI*G*rho[iXp][iYp];
+        psi = (4*PI*G*rho[iXp][iYp])*exp(-2/d);
         dX = (dX/d)*psi;
         dY = (dY/d)*psi;
 
         accelX += dX;
         accelY += dY;
+
+        if(x_pos > rho.size())
+        {
+            x_pos = x_pos-rho.size();
+        }
+        if(y_pos > rho.size())
+        {
+            y_pos = y_pos-rho.size();
+        }
+        if(x_pos < 0)
+        {
+            x_pos = x_pos+rho.size();
+        }
+        if(y_pos < 0)
+        {
+            y_pos = y_pos+rho.size();
+        }
 }
 
 void Particle::move(long double s)

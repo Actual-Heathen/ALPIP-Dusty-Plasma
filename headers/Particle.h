@@ -1,14 +1,8 @@
 #pragma once
+#include <vector>
 
 class Particle
 {
-    struct Vector
-    {
-        long double xVec = 0;
-        long double yVec = 0;
-        long double mag = 0;
-    };
-
     public:
         Particle();
         Particle(long double x, long double y, long double m);
@@ -16,7 +10,7 @@ class Particle
         long double getY();
         long double getMass();
         long double getSpeed();
-        void addAcceleration(double rho[][3], double spacing);
+        void addAcceleration(double spacing, std::vector<std::vector<double>> rho);
         void move(long double s);
         void resetAcc();
         void resetVel();
