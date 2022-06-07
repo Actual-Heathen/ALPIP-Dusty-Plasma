@@ -11,7 +11,7 @@ class Particle
         long double getMass();
         long double getSpeed();
         void addAcceleration(double spacing, std::vector<std::vector<double>> rho);
-        void move(long double s);
+        void move(double s, double size);
         void resetAcc();
         void resetVel();
     private:
