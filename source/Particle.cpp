@@ -58,26 +58,26 @@ long double Particle::getSpeed()
 
 void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> rho)
 {
-    int iXm = abs(floor(x_pos/spacing));
+    int iXm = abs(floor(x_pos/spacing));                //calculate iXm & iXp
     int iXp = iXm + 1;
-    if (iXp >= rho.size())
+    if (iXp >= rho.size())                              //adjust iXp if in the "ghost region"
     {
         iXp = iXp-rho.size();
     }
 
 
-    int iYm = floor(y_pos/spacing);
+    int iYm = floor(y_pos/spacing);                     //calculate iYm & iYp
     int iYp = iYm + 1;
-    if (iYp >=rho.size())
+    if (iYp >=rho.size())                               // adjust if in ghost region
     {
         iYp = iYp-rho.size();
     }
-    //cout << iXp<< ", "<< wXp << "<-ixp "<< iYp << ", "<< wYp << "<-iyp\n";
-    //cout << iXm<< " ,"<< wXm << "<-ixm "<< iYm << ", "<< wYm << "<-iym\n";
 
+                //W I P//W I P//W I P// //W I P//W I P//calculate psi and use it to add accleleration will change//W I P//W I P//W I P// //W I P//W I P//
     double dX = iXm*spacing-x_pos;
     double dY = iYm*spacing-y_pos;
     double d = sqrt(dX*dX+dY*dY);
+
     double psi = (4*PI*G*rho[iXm][iYm])*exp(-2*d);
     dX = (dX/d)*psi;
     dY = (dY/d)*psi;
@@ -88,6 +88,7 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
     dX = iXm*spacing-x_pos;
     dY = iYp*spacing-y_pos;
     d = sqrt(dX*dX+dY*dY);
+
     psi = (4*PI*G*rho[iXm][iYp])*exp(-2*d);
     dX = (dX/d)*psi;
     dY = (dY/d)*psi;
@@ -114,11 +115,11 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
 
     accelX += dX;
     accelY += dY;
-    //std::cout<< accelX<<"<-accel\n";
 }
 
 void Particle::move(double s, double size)
 {
+    // using d= v0t+ 1/2at^2 to calculate distance traveled
     long double dX = velX*s + .5*accelX*s*s;
     long double dY = velY*s + .5*accelY*s*s;
 
@@ -138,7 +139,7 @@ void Particle::move(double s, double size)
     accelY = 0;
     accel = 0;
 
-    if(x_pos > size)
+    if(x_pos > size)        //loop particle around periodically
     {
         x_pos = x_pos-size;
     }
