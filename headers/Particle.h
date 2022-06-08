@@ -5,7 +5,7 @@ class Particle
 {
     public:
         Particle();
-        Particle(long double x, long double y, long double m);
+        Particle(long double x, long double y, long double m, double vx, double vy);
         long double getX();
         long double getY();
         long double getMass();

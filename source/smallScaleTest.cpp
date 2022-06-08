@@ -6,12 +6,13 @@
 #include <math.h>
 #include <vector>
 #include <fstream>
+#include <fftw3.h>
 
 using namespace std;
-#define paticleCount 1
+#define paticleCount 300
 #define spacing (1*pow(10,-7))
-#define gridDiv 10
-#define loopCount 100
+#define gridDiv 3
+#define loopCount 500
 
 int main()
 {
@@ -19,7 +20,7 @@ int main()
 
     ofstream data;                                              //open data files
     ofstream coor;
-    data.open("data.d");
+    data.open("../data/data.d");
     coor.open("data.csv");
     
     vector<Particle> dust;                                      //declare dust and point grid
@@ -29,13 +30,19 @@ int main()
     
     for (int i = 0; i < paticleCount; i++)                      //set particle position
     {
-        Particle temp( ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv), ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv),1.0);
+        Particle temp( ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv), ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv),1.0,0.0,0.0);
         dust.push_back(temp);
-        cout << dust[i].getX() << ", " << dust[i].getY() << "\n";
+        //cout << dust[i].getX() << " " << dust[i].getY() << "\n";
     }
-
+    char fn[50];
     for (int l = 0; l< loopCount; l++)                          //main loop
     {
+
+        snprintf(fn, sizeof fn, "../data/up%05d.d",l);
+        ofstream f; f.open(fn);
+
+
+
         for (int i = 0; i < gridDiv; i++)                       //initialize/reset  point grid
         {
             for (int j = 0; j < gridDiv; j++)
@@ -87,7 +94,7 @@ int main()
             {
                 //cout << rho[i][j] << "\n";
                 rhoTemp += rho[i][j];                           //debugging//
-                data << rho[i][j]<<"\n";                        //add grid values to file
+                //data << rho[i][j]<<"\n";                        //add grid values to file
             }
         }
         //cout << "rho counted";    
@@ -96,14 +103,11 @@ int main()
 
         int work_done = 0;  //in paralell serial counter
 
-        #pragma omp parallel for num_threads(6) schedule(static)//define parallel section
-        {
+        //#pragma omp parallel for num_threads(6) schedule(static)//define parallel section
+        //{
             for (int i = 0; i < paticleCount; i++)              //calculate gravity
             {
-                if (i == 0)
-                {
-                    coor<< dust[0].getX() << ","<<dust[i].getY()<<"\n"; //write particle 0's coordinatess to csv
-                }
+                f << dust[i].getX() << " "<<dust[i].getY()<<"\n"; //write particle 0's coordinatess to csv
                 dust[i].addAcceleration(spacing, rho);          //add Acceleration based on densities
                 dust[i].move(.1, gridDiv*spacing);              //move particle
 
@@ -113,8 +117,9 @@ int main()
                 // if ((work_done % 1000) == 0) //debugging couter
                 //     cout <<"number "<< work_done << "counted\n";
             }
-        }
+        //}
         //cout << "grav calc\n";
+        f.close();
     }
     dust.clear();
     rho.clear();

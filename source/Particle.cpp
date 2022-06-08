@@ -15,11 +15,13 @@ Particle::Particle()
     setMass(0);
 }
 
-Particle::Particle(long double x, long double y, long double m)
+Particle::Particle(long double x, long double y, long double m, double vx, double vy)
 {
     setX(x);
     setY(y);
     setMass(m);
+    velX = vx;
+    velY = vy;
 }
 
 void Particle::setX(long double x)
