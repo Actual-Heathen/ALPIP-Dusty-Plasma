@@ -9,10 +9,10 @@
 #include <fftw3.h>
 
 using namespace std;
-#define paticleCount 300
+#define paticleCount 5000
 #define spacing (1*pow(10,-7))
-#define gridDiv 3
-#define loopCount 500
+#define gridDiv 100
+#define loopCount 200
 
 int main()
 {
@@ -21,7 +21,7 @@ int main()
     ofstream data;                                              //open data files
     ofstream coor;
     data.open("../data/data.d");
-    coor.open("data.csv");
+    //coor.open("data.csv");
     
     vector<Particle> dust;                                      //declare dust and point grid
     vector<vector<double>> rho(gridDiv, vector<double> (gridDiv));
@@ -37,9 +37,15 @@ int main()
     char fn[50];
     for (int l = 0; l< loopCount; l++)                          //main loop
     {
+        fftw_plan p;
+        fftw_complex *in, *out;
+        in = fftw_alloc_complex(gridDiv*gridDiv);
+        out = fftw_alloc_complex(gridDiv*gridDiv);
 
-        snprintf(fn, sizeof fn, "../data/up%05d.d",l);
-        ofstream f; f.open(fn);
+        snprintf(fn, sizeof fn, "../data/points%05d.d",l);
+        ofstream points; points.open(fn);
+        snprintf(fn, sizeof fn, "../data/density%05d.d",l);
+        ofstream density; density.open(fn);
 
 
 
@@ -85,6 +91,8 @@ int main()
             rho[iXp][iYp] += wXp*wYp;
         }
 
+
+
         //cout << "rho set\n";
         double rhoTemp = 0;                                     //debugging//
 
@@ -94,7 +102,7 @@ int main()
             {
                 //cout << rho[i][j] << "\n";
                 rhoTemp += rho[i][j];                           //debugging//
-                //data << rho[i][j]<<"\n";                        //add grid values to file
+                density << rho[j][i]<<"\n";                        //add grid values to file
             }
         }
         //cout << "rho counted";    
@@ -103,13 +111,17 @@ int main()
 
         int work_done = 0;  //in paralell serial counter
 
-        //#pragma omp parallel for num_threads(6) schedule(static)//define parallel section
-        //{
+        for (int i = 0; i < paticleCount; i++)
+        {
+           points << dust[i].getX() << " "<<dust[i].getY()<<"\n"; //write particle 0's coordinatess to csv
+        }
+
+        #pragma omp parallel for num_threads(6) schedule(static)//define parallel section
+        {
             for (int i = 0; i < paticleCount; i++)              //calculate gravity
             {
-                f << dust[i].getX() << " "<<dust[i].getY()<<"\n"; //write particle 0's coordinatess to csv
                 dust[i].addAcceleration(spacing, rho);          //add Acceleration based on densities
-                dust[i].move(.1, gridDiv*spacing);              //move particle
+                dust[i].move(1, gridDiv*spacing);              //move particle
 
                 #pragma omp atomic
                 work_done++;
@@ -117,9 +129,10 @@ int main()
                 // if ((work_done % 1000) == 0) //debugging couter
                 //     cout <<"number "<< work_done << "counted\n";
             }
-        //}
+        }
         //cout << "grav calc\n";
-        f.close();
+        points.close();
+        density.close();
     }
     dust.clear();
     rho.clear();
