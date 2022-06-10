@@ -58,65 +58,52 @@ long double Particle::getSpeed()
     return speed;
 }
 
-void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> rho)
+void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> dpsix, std::vector<std::vector<double>> dpsiy)
 {
-    int iXm = abs(floor(x_pos/spacing));                //calculate iXm & iXp
+    int iXm = floor(x_pos/spacing);                 //calculate iXm & iXp
     int iXp = iXm + 1;
-    int tXp = iXp;
-    if (iXp >= rho.size())                              //adjust iXp if in the "ghost region"
+
+    double wXm = 1- abs((x_pos/spacing)-iXm);       //weight calculations
+    double wXp = 1- abs((x_pos/spacing)-iXp);
+
+    if (iXp >= dpsix.size())                                 //adjust iXp if in "ghost region"
     {
-        iXp = iXp-rho.size();
+        iXp = iXp - dpsix.size();
     }
 
-
-    int iYm = floor(y_pos/spacing);                     //calculate iYm & iYp
+    int iYm = floor(y_pos/spacing);                 //calculate iYm and iYp
     int iYp = iYm + 1;
-    int tYp = iYp;
-    if (iYp >= rho.size())                               // adjust if in ghost region
+
+    double wYm = 1- abs((y_pos/spacing)-iYm);       //wieght calculation
+    double wYp = 1- abs((y_pos/spacing)-iYp);
+
+    if (iYp >= dpsiy.size())                                 //ghost region adjust
     {
-        iYp = iYp-rho.size();
+        iYp = iYp - dpsiy.size();
     }
 
                 //W I P//W I P//W I P// //W I P//W I P//calculate psi and use it to add accleleration will change//W I P//W I P//W I P// //W I P//W I P//
-    double dX = iXm*spacing-x_pos;
-    double dY = iYm*spacing-y_pos;
-    double d = sqrt(dX*dX+dY*dY);
-
-    double psi = (4*PI*G*rho[iXm][iYm])*exp(-2*d);
-    dX = (dX/d)*psi;
-    dY = (dY/d)*psi;
+    double dX = wXm*wYm*dpsix[iXm][iYm];
+    double dY = wXm*wYm*dpsiy[iXm][iYm];
 
     accelX += dX;
     accelY += dY;
 
-    dX = iXm*spacing-x_pos;
-    dY = tYp*spacing-y_pos;
-    d = sqrt(dX*dX+dY*dY);
-    
-
-    psi = (4*PI*G*rho[iXm][iYp])*exp(-2*d);
-    dX = (dX/d)*psi;
-    dY = (dY/d)*psi;
+    dX = wXm*wYp*dpsix[iXm][iYp];
+    dY = wXm*wYp*dpsiy[iXm][iYp];
 
     accelX += dX;
     accelY += dY;
- 
 
-    dX = tXp*spacing-x_pos;
-    dY = iYm*spacing-y_pos;
-    d = sqrt(dX*dX+dY*dY);
-    psi = (4*PI*G*rho[iXp][iYm])*exp(-2*d);
-    dX = (dX/d)*psi;
-    dY = (dY/d)*psi;
+
+    dX = wXp*wYm*dpsix[iXp][iYm];
+    dY = wXp*wYm*dpsiy[iXp][iYm];
+
     accelX += dX;
     accelY += dY;
 
-    dX = tXp*spacing-x_pos;
-    dY = tYp*spacing-y_pos;
-    d = sqrt(dX*dX+dY*dY);
-    psi = (4*PI*G*rho[iXp][iYp])*exp(-2*d);
-    dX = (dX/d)*psi;
-    dY = (dY/d)*psi;
+    dX = wXp*wYp*dpsix[iXp][iYp];
+    dY = wXp*wYp*dpsiy[iXp][iYp];
 
     accelX += dX;
     accelY += dY;
