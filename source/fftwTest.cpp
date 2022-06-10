@@ -55,7 +55,8 @@ int main()
     {
         for (int j = 0;j <N;j++)
         {
-            data << out2[i+(j*N)][0] << "\n"; // print data
+            float temp = (float)out2[i+(j*N)][0];
+            data << temp << "\n"; // print data
         }
     }
     for (int i  = 0; i < N;i++)

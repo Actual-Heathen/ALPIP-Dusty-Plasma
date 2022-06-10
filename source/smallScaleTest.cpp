@@ -9,10 +9,11 @@
 #include <fftw3.h>
 
 using namespace std;
-#define paticleCount 5000
+#define paticleCount 50
 #define spacing (1*pow(10,-7))
-#define gridDiv 100
-#define loopCount 200
+#define gridDiv 10
+#define loopCount 100
+#define PI 3.14159265
 
 int main()
 {
@@ -38,9 +39,13 @@ int main()
     for (int l = 0; l< loopCount; l++)                          //main loop
     {
         fftw_plan p;
+        fftw_plan r;
         fftw_complex *in, *out;
         in = fftw_alloc_complex(gridDiv*gridDiv);
         out = fftw_alloc_complex(gridDiv*gridDiv);
+
+        p = fftw_plan_dft_2d(gridDiv,gridDiv,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
+        r = fftw_plan_dft_2d(gridDiv,gridDiv,out,in,FFTW_BACKWARD,FFTW_ESTIMATE);
 
         snprintf(fn, sizeof fn, "../data/points%05d.d",l);
         ofstream points; points.open(fn);
@@ -94,17 +99,47 @@ int main()
 
 
         //cout << "rho set\n";
-        double rhoTemp = 0;                                     //debugging//
 
         for (int i = 0; i < gridDiv; i++)
         {
             for (int j = 0; j < gridDiv; j++)
             {
                 //cout << rho[i][j] << "\n";
-                rhoTemp += rho[i][j];                           //debugging//
-                density << rho[j][i]<<"\n";                        //add grid values to file
+                in[j+i*gridDiv][0] = rho[i][j];                           //add rho to fftw input
+                in[j+i*gridDiv][1] = 0;                           
+                //density << rho[j][i]<<"\n";                        //add grid values to file
             }
         }
+
+        fftw_execute(p);        //Execute the FFT
+                                                //calculate Kx, Ky//
+        double *Kx;
+        Kx = (double*) malloc(sizeof(double)*gridDiv);
+        for (int i = 0; i < gridDiv/2; i++)
+        {
+            Kx[i] = i*(2*PI)/(gridDiv/2);
+            Kx[gridDiv-1-i] = -i*(2*PI)/(gridDiv/2);
+        }
+        double *Ky;
+        Ky = (double*) malloc(sizeof(double)*gridDiv);
+        for (int i = 0; i < gridDiv/2; i ++)
+        {
+            Ky[i] = i*(2*PI)/(gridDiv/2);
+            Ky[gridDiv-1-i] = -i*(2*PI)/(gridDiv/2);
+        }
+
+        for (int i = 0; i < gridDiv; i++)
+        {
+            for (int j = 0; j < gridDiv; j++)
+            {
+                //cout << rho[i][j] << "\n";
+                double temp = (double)out[i*gridDiv+j][0];
+                temp = temp/(pow(Ky[j],2)+pow(Kx[i*gridDiv],2));
+            }
+        }
+
+        fftw_execute(r);
+
         //cout << "rho counted";    
 
         //cout << rhoTemp << " rho sum\n";                      //debugging//
@@ -133,6 +168,12 @@ int main()
         //cout << "grav calc\n";
         points.close();
         density.close();
+        fftw_destroy_plan(p);
+        fftw_destroy_plan(r);
+        fftw_free(in);
+        fftw_free(out);
+        free(Kx);
+        free(Ky);
     }
     dust.clear();
     rho.clear();

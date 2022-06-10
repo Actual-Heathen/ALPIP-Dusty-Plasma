@@ -62,6 +62,7 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
 {
     int iXm = abs(floor(x_pos/spacing));                //calculate iXm & iXp
     int iXp = iXm + 1;
+    int tXp = iXp;
     if (iXp >= rho.size())                              //adjust iXp if in the "ghost region"
     {
         iXp = iXp-rho.size();
@@ -70,7 +71,8 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
 
     int iYm = floor(y_pos/spacing);                     //calculate iYm & iYp
     int iYp = iYm + 1;
-    if (iYp >=rho.size())                               // adjust if in ghost region
+    int tYp = iYp;
+    if (iYp >= rho.size())                               // adjust if in ghost region
     {
         iYp = iYp-rho.size();
     }
@@ -88,8 +90,9 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
     accelY += dY;
 
     dX = iXm*spacing-x_pos;
-    dY = iYp*spacing-y_pos;
+    dY = tYp*spacing-y_pos;
     d = sqrt(dX*dX+dY*dY);
+    
 
     psi = (4*PI*G*rho[iXm][iYp])*exp(-2*d);
     dX = (dX/d)*psi;
@@ -97,26 +100,27 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
 
     accelX += dX;
     accelY += dY;
+ 
 
-    dX = iXp*spacing-x_pos;
+    dX = tXp*spacing-x_pos;
     dY = iYm*spacing-y_pos;
     d = sqrt(dX*dX+dY*dY);
-    psi = (4*PI*G*rho[iXp][iYm])*exp(-2/d);
+    psi = (4*PI*G*rho[iXp][iYm])*exp(-2*d);
     dX = (dX/d)*psi;
     dY = (dY/d)*psi;
-
     accelX += dX;
     accelY += dY;
 
-    dX = iXp*spacing-x_pos;
-    dY = iYp*spacing-y_pos;
+    dX = tXp*spacing-x_pos;
+    dY = tYp*spacing-y_pos;
     d = sqrt(dX*dX+dY*dY);
-    psi = (4*PI*G*rho[iXp][iYp])*exp(-2/d);
+    psi = (4*PI*G*rho[iXp][iYp])*exp(-2*d);
     dX = (dX/d)*psi;
     dY = (dY/d)*psi;
 
     accelX += dX;
     accelY += dY;
+
 }
 
 void Particle::move(double s, double size)

@@ -4,7 +4,7 @@ from matplotlib.animation import FuncAnimation
 plt.style.use('seaborn-pastel')
 
 fig = plt.figure()
-ax = plt.axes(xlim = (0,1/(100000)),ylim = (0,1/(100000)))
+ax = plt.axes(xlim = (0,3/(100000)),ylim = (0,3/(100000)))
 line, = ax.plot([],[],'.')
 
 def init():
@@ -21,6 +21,6 @@ def animate(i):
     line.set_data(dat[:,0],dat[:,1])
     return line,
 
-anim = FuncAnimation(fig,animate, init_func=init, frames = 200, interval = 20, blit = True)
+anim = FuncAnimation(fig,animate, init_func=init, frames = 200, interval = 40, blit = True)
 
 anim.save('points.gif',writer = 'imagemagick')
