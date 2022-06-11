@@ -14,6 +14,6 @@ def animate(i):
     #plt.colormesh(dat)
     f.close()
 
-anim =  animation.FuncAnimation(fig,animate, frames = 20, interval =40)
+anim =  animation.FuncAnimation(fig,animate, frames = 200, interval =20)
 
 anim.save('density.gif',writer = 'imagemagick')

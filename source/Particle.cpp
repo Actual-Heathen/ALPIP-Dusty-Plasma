@@ -22,6 +22,9 @@ Particle::Particle(long double x, long double y, long double m, double vx, doubl
     setMass(m);
     velX = vx;
     velY = vy;
+    accel = 0;
+    accelX = 0;
+    accelY = 0;
 }
 
 void Particle::setX(long double x)
@@ -82,18 +85,22 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
         iYp = iYp - dpsiy.size();
     }
 
-                //W I P//W I P//W I P// //W I P//W I P//calculate psi and use it to add accleleration will change//W I P//W I P//W I P// //W I P//W I P//
+    //std::cout <<"yxmp\n";
+
     double dX = wXm*wYm*dpsix[iXm][iYm];
     double dY = wXm*wYm*dpsiy[iXm][iYm];
 
     accelX += dX;
     accelY += dY;
+    //std::cout <<"mm\n";
 
     dX = wXm*wYp*dpsix[iXm][iYp];
     dY = wXm*wYp*dpsiy[iXm][iYp];
 
     accelX += dX;
     accelY += dY;
+
+    //std::cout <<"mp\n";
 
 
     dX = wXp*wYm*dpsix[iXp][iYm];
@@ -102,11 +109,15 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
     accelX += dX;
     accelY += dY;
 
+    //std::cout <<"pm\n";
+
     dX = wXp*wYp*dpsix[iXp][iYp];
     dY = wXp*wYp*dpsiy[iXp][iYp];
 
     accelX += dX;
     accelY += dY;
+
+    //std::cout <<accelX<<"\n";
 
 }
 
@@ -132,11 +143,11 @@ void Particle::move(double s, double size)
     accelY = 0;
     accel = 0;
 
-    if(x_pos > size)        //loop particle around periodically
+    if(x_pos >= size)        //loop particle around periodically
     {
         x_pos = x_pos-size;
     }
-    if(y_pos > size)
+    if(y_pos >= size)
     {
         y_pos = y_pos-size;
     }
