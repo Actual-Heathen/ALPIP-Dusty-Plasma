@@ -9,10 +9,10 @@
 #include <fftw3.h>
 
 using namespace std;
-#define paticleCount 10000
+#define paticleCount 5000
 #define spacing (1*pow(10,-7))
 #define gridDiv 10
-#define loopCount 20000
+#define loopCount 2000
 #define PI 3.14159265
 
 int main()
@@ -22,8 +22,14 @@ int main()
 
     ofstream data;                                              //open data files
     ofstream coor;
-    data.open("../data/densityF.d");
+    data.open("../data/density.d");
     coor.open("../data/pointsF.d");
+    ofstream fou;                                              //open data files
+    ofstream adj;
+    fou.open("../data/fTransform.d");
+    adj.open("../data/aFTransform.d");
+    ofstream fp;                                              //open data files
+    fp.open("../data/psi.d");
 
     vector<Particle> dust;                                      //declare dust and point grid
     vector<vector<double>> rho(gridDiv, vector<double> (gridDiv));
@@ -142,12 +148,13 @@ int main()
             {
                 //cout << rho[i][j] << "\n";
                 double temp = out[i*gridDiv+j][0];
-                
+                fou << temp << "\n";
 		        double tempC = out[i*gridDiv+j][1];
                 temp = temp/(pow(Ky[j],2)+pow(Kx[i],2));
 		        tempC = tempC/(pow(Ky[j],2)+pow(Kx[i],2));
 
 		        out[i*gridDiv +j][0] = temp;
+                adj << temp<<"\n";
 		        out[i*gridDiv+j][1] = tempC;
 		        
             }
@@ -162,7 +169,7 @@ int main()
             for(int j = 0; j < gridDiv; j++)
             {
                 rho[i][j] = in[i*gridDiv+j][0];
-                //density<< rho[i][j]<<"\n";
+                fp<< rho[i][j]<<"\n";
             }
         }
 
@@ -236,4 +243,7 @@ int main()
     rho.clear();
     data.close();
     coor.close();
+    fou.close();
+    fp.close();
+    adj.close();
 }
