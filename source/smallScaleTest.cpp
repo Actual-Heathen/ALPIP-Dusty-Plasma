@@ -11,7 +11,7 @@
 using namespace std;
 #define paticleCount 5000
 #define spacing (1*pow(10,-7))
-#define gridDiv 10
+#define gridDiv 20
 #define loopCount 2000
 #define PI 3.14159265
 
@@ -22,13 +22,13 @@ int main()
 
     ofstream data;                                              //open data files
     ofstream coor;
-    data.open("../data/density.d");
-    coor.open("../data/pointsF.d");
     ofstream fou;                                              //open data files
     ofstream adj;
+    ofstream fp;
+    data.open("../data/density.d");
+    coor.open("../data/pointsF.d");
     fou.open("../data/fTransform.d");
     adj.open("../data/aFTransform.d");
-    ofstream fp;                                              //open data files
     fp.open("../data/psi.d");
 
     vector<Particle> dust;                                      //declare dust and point grid
@@ -126,17 +126,14 @@ int main()
         fftw_execute(p);        //Execute the FFT
         //calculate Kx, Ky//
         double *Kx;
+        double *Ky;
         Kx = (double*) malloc(sizeof(double)*gridDiv);
+        Ky = (double*) malloc(sizeof(double)*gridDiv);
+
         for (int i = 0; i < gridDiv/2; i++)
         {
             Kx[i] = (i+1)*(2*PI)/(gridDiv*spacing);
             Kx[gridDiv-1-i] = -(i+1)*(2*PI)/((gridDiv*spacing));
-        }
-
-        double *Ky;
-        Ky = (double*) malloc(sizeof(double)*gridDiv);
-        for (int i = 0; i < gridDiv/2; i ++)
-        {
             Ky[i] = (i+1)*(2*PI)/((gridDiv*spacing));
             Ky[gridDiv-1-i] = -(i+1)*(2*PI)/((gridDiv*spacing));
         }
@@ -164,19 +161,18 @@ int main()
 
 
         fftw_execute(r);
-        for (int i = 0; i < gridDiv;i++)
-        {
-            for(int j = 0; j < gridDiv; j++)
-            {
-                rho[i][j] = in[i*gridDiv+j][0];
-                fp<< rho[i][j]<<"\n";
-            }
-        }
+
+        //print gradient
 
         for (int i = 0; i < gridDiv; i++)
         {
             for (int j = 0; j < gridDiv; j++)
             {
+                //print gradient//
+                rho[i][j] = in[i*gridDiv+j][0];
+                fp<< rho[i][j]<<"\n";
+
+                //calculate dPsi
                 int xm;
                 int xp;
                 int ym;
@@ -208,16 +204,11 @@ int main()
 
         int work_done = 0;  //in paralell serial counter
 
-        for (int i = 0; i < paticleCount; i++)
-        {
-           //points << dust[i].getX() << " "<<dust[i].getY()<<"\n"; //write particle 0's coordinatess to csv
-           coor << dust[i].getX() << " "<<dust[i].getY()<<"\n";
-        }
-
         #pragma omp parallel for num_threads(6) schedule(static)//define parallel section
         {
             for (int i = 0; i < paticleCount; i++)              //calculate gravity
             {
+                coor << dust[i].getX() << " "<<dust[i].getY()<<"\n"; // write particle to csv 
                 dust[i].addAcceleration(spacing, dpsix, dpsiy);          //add Acceleration based on densities
                 //cout<<"accel\n";
                 dust[i].move(1, gridDiv*spacing);              //move particle
