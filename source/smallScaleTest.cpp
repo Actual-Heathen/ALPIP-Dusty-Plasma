@@ -9,16 +9,18 @@
 #include <fftw3.h>
 
 using namespace std;
-#define paticleCount 5000
-#define spacing (1*pow(10,-7))
-#define gridDiv 20
+#define paticleCount 50000
+#define spacing (1*pow(10,-2))
+#define gridDiv 100
 #define loopCount 2000
 #define PI 3.14159265
+
 
 int main()
 {
     double ppc = paticleCount/pow(gridDiv-1,2);
     srand(time(NULL));                                          //seed random number generator
+    double timeStep = .1;
 
     ofstream data;                                              //open data files
     ofstream coor;
@@ -35,11 +37,14 @@ int main()
     vector<vector<double>> rho(gridDiv, vector<double> (gridDiv));
     vector<vector<double>> dpsix(gridDiv, vector<double> (gridDiv));
     vector<vector<double>> dpsiy(gridDiv, vector<double> (gridDiv));
+    double B[3] = {0,0,1};
+    double E[3] = {0,0.1,0};
     //cout << "declared\n";
 
     for (int i = 0; i < paticleCount; i++)                      //set particle position
     {
-        Particle temp( ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv), ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv),1.0,0.0,0.0);
+        Particle temp( ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv), ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv),1.0,-0.01,0.0);
+        //Particle temp( 20,20,1.0,-1.0,0.0);
         dust.push_back(temp);
         //cout << dust[i].getX() << " " << dust[i].getY() << "\n";
     }
@@ -203,15 +208,19 @@ int main()
         //cout << rhoTemp << " rho sum\n";                      //debugging//
 
         int work_done = 0;  //in paralell serial counter
+        for (int i = 0; i < paticleCount; i ++)
+        {
+            coor << dust[i].getX() << " "<<dust[i].getY()<<"\n"; // write particle to csv 
+        }
 
         #pragma omp parallel for num_threads(6) schedule(static)//define parallel section
         {
             for (int i = 0; i < paticleCount; i++)              //calculate gravity
             {
-                coor << dust[i].getX() << " "<<dust[i].getY()<<"\n"; // write particle to csv 
-                dust[i].addAcceleration(spacing, dpsix, dpsiy);          //add Acceleration based on densities
+                
+                dust[i].addAcceleration(spacing, dpsix, dpsiy,E,B,timeStep);          //add Acceleration based on densities
                 //cout<<"accel\n";
-                dust[i].move(1, gridDiv*spacing);              //move particle
+                dust[i].move(timeStep, gridDiv*spacing);              //move particle
                 //cout<<"move\n";
 		        //cout <<"moved\n";
                 #pragma omp atomic
