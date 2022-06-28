@@ -9,8 +9,8 @@
 #include <fftw3.h>
 
 using namespace std;
-#define paticleCount 50000
-#define spacing (1*pow(10,-2))
+#define ppc 10
+#define gridSize 1
 #define gridDiv 100
 #define loopCount 2000
 #define PI 3.14159265
@@ -18,7 +18,9 @@ using namespace std;
 
 int main()
 {
-    double ppc = paticleCount/pow(gridDiv-1,2);
+    double spacing = gridSize/(gridDiv-1);
+    int particleCount = ppc*pow(gridDiv-1,2);
+
     srand(time(NULL));                                          //seed random number generator
     double timeStep = .1;
 
@@ -41,7 +43,7 @@ int main()
     double E[3] = {0,0.1,0};
     //cout << "declared\n";
 
-    for (int i = 0; i < paticleCount; i++)                      //set particle position
+    for (int i = 0; i < particleCount; i++)                      //set particle position
     {
         Particle temp( ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv), ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv),1.0,-0.01,0.0);
         //Particle temp( 20,20,1.0,-1.0,0.0);
@@ -78,7 +80,7 @@ int main()
         }
         //cout << "rho reset\n";
 
-        for (int i = 0; i < paticleCount; i++)                  //calculate rho
+        for (int i = 0; i < particleCount; i++)                  //calculate rho
         {
             double sp = spacing;
 
@@ -208,14 +210,14 @@ int main()
         //cout << rhoTemp << " rho sum\n";                      //debugging//
 
         int work_done = 0;  //in paralell serial counter
-        for (int i = 0; i < paticleCount; i ++)
+        for (int i = 0; i < particleCount; i ++)
         {
             coor << dust[i].getX() << " "<<dust[i].getY()<<"\n"; // write particle to csv 
         }
 
         #pragma omp parallel for num_threads(6) schedule(static)//define parallel section
         {
-            for (int i = 0; i < paticleCount; i++)              //calculate gravity
+            for (int i = 0; i < particleCount; i++)              //calculate gravity
             {
                 
                 dust[i].addAcceleration(spacing, dpsix, dpsiy,E,B,timeStep);          //add Acceleration based on densities
