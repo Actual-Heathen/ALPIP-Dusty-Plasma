@@ -10,7 +10,7 @@ class Particle
         long double getY();
         long double getMass();
         long double getSpeed();
-        void addAcceleration(double spacing, std::vector<std::vector<double>> dpsix, std::vector<std::vector<double>> dpsiy);
+        void addAcceleration(double spacing, std::vector<std::vector<double>> dpsix, std::vector<std::vector<double>> dpsiy, double E[3], double B[3], double time);
         void move(double s, double size);
         void resetAcc();
         void resetVel();
@@ -19,13 +19,14 @@ class Particle
         void setY(long double y);
         void setMass(long double m);
 
-        long double x_pos;
-        long double y_pos;
-        long double mass;
-        long double speed = 0;
-        long double velX = 0;
-        long double velY = 0;
-        long double accel = 0;
-        long double accelX = 0;
-        long double accelY = 0;
+        double x_pos;
+        double y_pos;
+        double mass;
+        double speed = 0;
+        double velX = 0;
+        double velY = 0;
+        double accel = 0;
+        double accelX = 0;
+        double accelY = 0;
+        double charge;
 };

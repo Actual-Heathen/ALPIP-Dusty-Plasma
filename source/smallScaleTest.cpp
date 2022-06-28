@@ -10,43 +10,41 @@
 
 using namespace std;
 #define ppc 10
-#define gridSize 1
-#define gridDiv 100
+#define gridSize 1.0
+#define gridDiv 12
 #define loopCount 2000
 #define PI 3.14159265
 
-
 int main()
 {
-    double spacing = gridSize/(gridDiv-1);
-    int particleCount = ppc*pow(gridDiv-1,2);
-
-    srand(time(NULL));                                          //seed random number generator
+    //int particleCount = ppc*(gridDiv-1);
+    int particleCount = 2;
+    double spacing = (double)gridSize/(double)(gridDiv-1);
+    double E[3] = {0,0,0};
+    double B[3] = {0,0,1};
     double timeStep = .1;
+    srand(time(NULL));                                          //seed random number generator
 
     ofstream data;                                              //open data files
     ofstream coor;
-    ofstream fou;                                              //open data files
-    ofstream adj;
-    ofstream fp;
     data.open("../data/density.d");
     coor.open("../data/pointsF.d");
+    ofstream fou;                                              //open data files
+    ofstream adj;
     fou.open("../data/fTransform.d");
     adj.open("../data/aFTransform.d");
+    ofstream fp;                                              //open data files
     fp.open("../data/psi.d");
 
     vector<Particle> dust;                                      //declare dust and point grid
     vector<vector<double>> rho(gridDiv, vector<double> (gridDiv));
     vector<vector<double>> dpsix(gridDiv, vector<double> (gridDiv));
     vector<vector<double>> dpsiy(gridDiv, vector<double> (gridDiv));
-    double B[3] = {0,0,1};
-    double E[3] = {0,0.1,0};
     //cout << "declared\n";
 
     for (int i = 0; i < particleCount; i++)                      //set particle position
     {
         Particle temp( ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv), ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv),1.0,-0.01,0.0);
-        //Particle temp( 20,20,1.0,-1.0,0.0);
         dust.push_back(temp);
         //cout << dust[i].getX() << " " << dust[i].getY() << "\n";
     }
@@ -133,14 +131,17 @@ int main()
         fftw_execute(p);        //Execute the FFT
         //calculate Kx, Ky//
         double *Kx;
-        double *Ky;
         Kx = (double*) malloc(sizeof(double)*gridDiv);
-        Ky = (double*) malloc(sizeof(double)*gridDiv);
-
         for (int i = 0; i < gridDiv/2; i++)
         {
             Kx[i] = (i+1)*(2*PI)/(gridDiv*spacing);
             Kx[gridDiv-1-i] = -(i+1)*(2*PI)/((gridDiv*spacing));
+        }
+
+        double *Ky;
+        Ky = (double*) malloc(sizeof(double)*gridDiv);
+        for (int i = 0; i < gridDiv/2; i ++)
+        {
             Ky[i] = (i+1)*(2*PI)/((gridDiv*spacing));
             Ky[gridDiv-1-i] = -(i+1)*(2*PI)/((gridDiv*spacing));
         }
@@ -168,18 +169,19 @@ int main()
 
 
         fftw_execute(r);
-
-        //print gradient
+        for (int i = 0; i < gridDiv;i++)
+        {
+            for(int j = 0; j < gridDiv; j++)
+            {
+                rho[i][j] = in[i*gridDiv+j][0];
+                fp<< rho[i][j]<<"\n";
+            }
+        }
 
         for (int i = 0; i < gridDiv; i++)
         {
             for (int j = 0; j < gridDiv; j++)
             {
-                //print gradient//
-                rho[i][j] = in[i*gridDiv+j][0];
-                fp<< rho[i][j]<<"\n";
-
-                //calculate dPsi
                 int xm;
                 int xp;
                 int ym;
@@ -210,19 +212,20 @@ int main()
         //cout << rhoTemp << " rho sum\n";                      //debugging//
 
         int work_done = 0;  //in paralell serial counter
-        for (int i = 0; i < particleCount; i ++)
+
+        for (int i = 0; i < particleCount; i++)
         {
-            coor << dust[i].getX() << " "<<dust[i].getY()<<"\n"; // write particle to csv 
+           //points << dust[i].getX() << " "<<dust[i].getY()<<"\n"; //write particle 0's coordinatess to csv
+           coor << dust[i].getX() << " "<<dust[i].getY()<<"\n";
         }
 
         #pragma omp parallel for num_threads(6) schedule(static)//define parallel section
         {
             for (int i = 0; i < particleCount; i++)              //calculate gravity
             {
-                
                 dust[i].addAcceleration(spacing, dpsix, dpsiy,E,B,timeStep);          //add Acceleration based on densities
                 //cout<<"accel\n";
-                dust[i].move(timeStep, gridDiv*spacing);              //move particle
+                dust[i].move(1, gridDiv*spacing);              //move particle
                 //cout<<"move\n";
 		        //cout <<"moved\n";
                 #pragma omp atomic
