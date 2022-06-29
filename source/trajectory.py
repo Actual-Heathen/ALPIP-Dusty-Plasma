@@ -4,11 +4,11 @@ from matplotlib.animation import FuncAnimation
 plt.style.use('seaborn-pastel')
 
 fig = plt.figure()
-ax = plt.axes(xlim = (0,40/(1)),ylim = (0,40/(1)))
-#line, = ax.plot([],[],'.')
+ax = plt.axes(xlim = (0,10/(1)),ylim = (0,10/(1)))
+line, = ax.plot([],[],'.')
 f = open('../data/pointsF.d', 'r')
 dat=np.fromfile(f,dtype='float64', sep=" ").reshape(-1,2)
-ax.plot(dat[:,0],dat[:,1])
+ax.plot(dat[:,0],dat[:,1],'.')
 plt.savefig('trajectory.png')
 plt.show()
 #def init():

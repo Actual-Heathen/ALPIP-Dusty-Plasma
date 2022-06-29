@@ -98,7 +98,6 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
     //std::cout <<"yxmp\n";
 
     double dX = wXm*wYm*dpsix[iXm][iYm];
-    //std::cout<<dX;
     double dY = wXm*wYm*dpsiy[iXm][iYm];
 
     accelX += dX;
@@ -134,18 +133,16 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
 
 void Particle::move(double s, double size)
 {
-    // using d= v0t+ 1/2at^2 to calculate distance traveled
-    double dX = velX*s + .5*accelX*s*s;
-    double dY = velY*s + .5*accelY*s*s;
+     // using d= v0t+ 1/2at^2 to calculate distance traveled
+    long double dX = velX*s + .5*accelX*s*s;
+    long double dY = velY*s + .5*accelY*s*s;
 
-    double xV = dX/s;
-    double yV = dY/s;
+    long double xV = dX/s;
+    long double yV = dY/s;
 
     velX = xV;
     velY = yV;
     speed = sqrt(xV*xV + yV*yV);
-
-    
 
     x_pos += dX;
     y_pos += dY;

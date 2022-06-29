@@ -10,25 +10,27 @@
 
 using namespace std;
 #define ppc 10
-#define gridSize 1.0
-#define gridDiv 12
-#define loopCount 2000
+#define gridSize 10.0
+#define gridDiv 40
+#define loopCount 100
 #define PI 3.14159265
+//#define particleCount 1600
 
 int main()
 {
-    //int particleCount = ppc*(gridDiv-1);
-    int particleCount = 2;
-    double spacing = (double)gridSize/(double)(gridDiv-1);
+    int particleCount = (ppc*pow((gridDiv),2));
+    double spacing = (double)gridSize/(double)(gridDiv);
     double E[3] = {0,0,0};
-    double B[3] = {0,0,1};
+    double B[3] = {0,0,0};
     double timeStep = .1;
     srand(time(NULL));                                          //seed random number generator
 
     ofstream data;                                              //open data files
     ofstream coor;
+    ofstream pointTime;
     data.open("../data/density.d");
     coor.open("../data/pointsF.d");
+    pointTime.open("../data/pointTime.d");
     ofstream fou;                                              //open data files
     ofstream adj;
     fou.open("../data/fTransform.d");
@@ -44,7 +46,8 @@ int main()
 
     for (int i = 0; i < particleCount; i++)                      //set particle position
     {
-        Particle temp( ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv), ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv),1.0,-0.01,0.0);
+        Particle temp( ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv), ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv),1,0,0.0);
+        //Particle temp( 2.5, 0,1,-0.1,0.0);
         dust.push_back(temp);
         //cout << dust[i].getX() << " " << dust[i].getY() << "\n";
     }
@@ -106,10 +109,10 @@ int main()
 
             //cout << iXm<<"\n";        
 
-            rho[iXm][iYm] += ((wXm*wYm));                           //add weights to points
-            rho[iXm][iYp] += ((wXm*wYp));
-            rho[iXp][iYm] += ((wXp*wYm));
-            rho[iXp][iYp] += ((wXp*wYp));
+            rho[iXm][iYm] += ((wXm*wYm))/ppc;                           //add weights to points
+            rho[iXm][iYp] += ((wXm*wYp))/ppc;
+            rho[iXp][iYm] += ((wXp*wYm))/ppc;
+            rho[iXp][iYp] += ((wXp*wYp))/ppc;
         }
 
 
@@ -122,7 +125,7 @@ int main()
             {
                 //cout << rho[i][j] << "\n";
                 in[j+i*gridDiv][0] = rho[i][j];  //add rho to fftw input
-                data<<rho[i][j]<<"\n";     
+                data<<rho[j][i]<<"\n";     
                 in[j+i*gridDiv][1] = 0;
                 //density << rho[j][i]<<"\n";                        //add grid values to file
             }
@@ -174,7 +177,7 @@ int main()
             for(int j = 0; j < gridDiv; j++)
             {
                 rho[i][j] = in[i*gridDiv+j][0];
-                fp<< rho[i][j]<<"\n";
+                
             }
         }
 
@@ -200,9 +203,10 @@ int main()
                 if (j >= gridDiv-1)
                     yp = 0;
 
-                dpsix[i][j] = (rho[xp][j]-rho[xm][j])/(2*gridDiv);
+                dpsix[i][j] = (rho[xp][j]-rho[xm][j])/(2*spacing);
                 //density << (rho[xp][j]-rho[xm][j])/(2*gridDiv)<<"\n";
-                dpsiy[i][j] = (rho[i][yp]-rho[i][ym])/(2*gridDiv);
+                dpsiy[i][j] = (rho[i][yp]-rho[i][ym])/(2*spacing);
+                fp<< rho[j][i]<<"\n";
 
             }
 	    }
@@ -217,6 +221,7 @@ int main()
         {
            //points << dust[i].getX() << " "<<dust[i].getY()<<"\n"; //write particle 0's coordinatess to csv
            coor << dust[i].getX() << " "<<dust[i].getY()<<"\n";
+           pointTime << timeStep*l << " "<<  dust[0].getY() <<"\n";
         }
 
         #pragma omp parallel for num_threads(6) schedule(static)//define parallel section
@@ -225,7 +230,7 @@ int main()
             {
                 dust[i].addAcceleration(spacing, dpsix, dpsiy,E,B,timeStep);          //add Acceleration based on densities
                 //cout<<"accel\n";
-                dust[i].move(1, gridDiv*spacing);              //move particle
+                dust[i].move(timeStep, gridDiv*spacing);              //move particle
                 //cout<<"move\n";
 		        //cout <<"moved\n";
                 #pragma omp atomic
@@ -251,4 +256,5 @@ int main()
     fou.close();
     fp.close();
     adj.close();
+    pointTime.close();
 }

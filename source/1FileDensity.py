@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-N = 10
+N = 4
 N2 = N*N
 fr = (20000)-2
 fig=plt.figure()
