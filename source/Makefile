@@ -10,6 +10,7 @@ all: $(TARGET)
 
 $(TARGET): $(TARGET).cpp
 	$(CC) $(CFLAGS) -o $(TARGET) $(SOURCES) $(LDFLAGS)
+	ln $(TARGET) ../$(TARGET)
 
 clean:
 	$(RM) $(TARGET)
