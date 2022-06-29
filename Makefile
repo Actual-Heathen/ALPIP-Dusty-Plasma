@@ -1,7 +1,7 @@
 TARGET = smallScaleTest
 
 all:
-	$(MAKE) -C source
 	$(MAKE) clean
+	$(MAKE) -C source
 clean:
 	$(RM) $(TARGET) ./source/$(TARGET)
