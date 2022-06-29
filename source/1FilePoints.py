@@ -25,4 +25,4 @@ def animate(i):
 
 anim = FuncAnimation(fig,animate, init_func=init, frames = 100, interval = 20, blit = True)
 
-anim.save('points.gif',writer = 'imagemagick')
+anim.save('../plots/points.gif',writer = 'imagemagick')

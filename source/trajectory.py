@@ -9,7 +9,7 @@ line, = ax.plot([],[],'.')
 f = open('../data/pointsF.d', 'r')
 dat=np.fromfile(f,dtype='float64', sep=" ").reshape(-1,2)
 ax.plot(dat[:,0],dat[:,1],'.')
-plt.savefig('trajectory.png')
+plt.savefig('../plots/trajectory.png')
 plt.show()
 #def init():
 #    line.set_data([],[])

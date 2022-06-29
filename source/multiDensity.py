@@ -10,7 +10,7 @@ p = open('../data/psi.d', 'r')
 
 N = 10
 N2 = N*N
-fr = (2000)-2
+fr = (5)-2
 
 fig = plt.figure()
 
@@ -30,7 +30,7 @@ def update_anim(it):
     Z2=np.fromfile(f, dtype='float64', sep= ' ', count=N2).reshape(N,N)
     Z3=np.fromfile(a, dtype='float64', sep= ' ', count=N2).reshape(N,N)
     Z4=np.fromfile(p, dtype='float64', sep= ' ', count=N2).reshape(N,N)
-    
+
     im1=ax[0,0].imshow(Z1 ,aspect='equal', origin='lower', cmap='Greys')
     im2=ax[1,0].imshow(Z2 ,aspect='equal', origin='lower', cmap='Blues')
     im3=ax[0,1].imshow(Z3 ,aspect='equal', origin='lower', cmap='Reds')
@@ -47,7 +47,7 @@ def update_anim(it):
 fig=plt.figure(figsize=(6,6))
 anim=animation.FuncAnimation(fig,update_anim,frames=fr,interval=20)
 
-anim.save('multiDensity.gif',writer = 'imagemagick')
+anim.save('../plots/multiDensity.gif',writer = 'imagemagick')
 #plt.subplots_adjust(wspace=0.1,hspace=0.01, bottom=0,top=1)
 
 plt.close()

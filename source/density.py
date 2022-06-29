@@ -16,4 +16,4 @@ def animate(i):
 
 anim =  animation.FuncAnimation(fig,animate, frames = 200, interval =20)
 
-anim.save('density.gif',writer = 'imagemagick')
+anim.save('../plots/density.gif',writer = 'imagemagick')
