@@ -11,7 +11,7 @@
 using namespace std;
 #define ppc 10
 #define gridSize 10.0
-#define gridDiv 40
+#define gridDiv 20
 #define loopCount 100
 #define PI 3.14159265
 //#define particleCount 1600
@@ -28,21 +28,21 @@ int main()
     ofstream data;                                              //open data files
     ofstream coor;
     ofstream pointTime;
-    data.open("../data/density.d");
-    coor.open("../data/pointsF.d");
-    pointTime.open("../data/pointTime.d");
+    data.open("data/density.d");
+    coor.open("data/pointsF.d");
+    pointTime.open("data/pointTime.d");
     ofstream fou;                                              //open data files
     ofstream adj;
-    fou.open("../data/fTransform.d");
-    adj.open("../data/aFTransform.d");
+    fou.open("data/fTransform.d");
+    adj.open("data/aFTransform.d");
     ofstream fp;                                              //open data files
-    fp.open("../data/psi.d");
+    fp.open("data/psi.d");
 
     vector<Particle> dust;                                      //declare dust and point grid
     vector<vector<double>> rho(gridDiv, vector<double> (gridDiv));
     vector<vector<double>> dpsix(gridDiv, vector<double> (gridDiv));
     vector<vector<double>> dpsiy(gridDiv, vector<double> (gridDiv));
-    //cout << "declared\n";
+    cout << "declared\n";
 
     for (int i = 0; i < particleCount; i++)                      //set particle position
     {
