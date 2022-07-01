@@ -11,7 +11,7 @@
 using namespace std;
 #define ppc 10
 #define gridSize 10.0
-#define gridDiv 20
+#define gridDiv 15
 #define loopCount 100
 #define PI 3.14159265
 //#define particleCount 1600
@@ -24,6 +24,7 @@ int main()
     double B[3] = {0,0,0};
     double timeStep = .1;
     srand(time(NULL));                                          //seed random number generator
+    double energy = 0;
 
     ofstream data;                                              //open data files
     ofstream coor;
@@ -51,7 +52,6 @@ int main()
         dust.push_back(temp);
         //cout << dust[i].getX() << " " << dust[i].getY() << "\n";
     }
-    char fn[50];
     for (int l = 0; l< loopCount; l++)                          //main loop
     {
         fftw_plan p;
@@ -79,7 +79,7 @@ int main()
             }
 
         }
-        //cout << "rho reset\n";
+        cout << "rho reset\n";
 
         for (int i = 0; i < particleCount; i++)                  //calculate rho
         {
@@ -117,7 +117,7 @@ int main()
 
 
 
-        //cout << "rho set\n";
+        cout << "rho set\n";
 
         for (int i = 0; i < gridDiv; i++)
         {
@@ -125,7 +125,8 @@ int main()
             {
                 //cout << rho[i][j] << "\n";
                 in[j+i*gridDiv][0] = rho[i][j];  //add rho to fftw input
-                data<<rho[j][i]<<"\n";     
+                data<<rho[j][i]<<"\n";
+                energy += rho[j][i];
                 in[j+i*gridDiv][1] = 0;
                 //density << rho[j][i]<<"\n";                        //add grid values to file
             }
@@ -135,7 +136,7 @@ int main()
         //calculate Kx, Ky//
         double *Kx;
         Kx = (double*) malloc(sizeof(double)*gridDiv);
-        for (int i = 0; i < gridDiv/2; i++)
+        for (int i = 0; i < gridDiv/2.0; i++)
         {
             Kx[i] = (i+1)*(2*PI)/(gridDiv*spacing);
             Kx[gridDiv-1-i] = -(i+1)*(2*PI)/((gridDiv*spacing));
@@ -143,7 +144,7 @@ int main()
 
         double *Ky;
         Ky = (double*) malloc(sizeof(double)*gridDiv);
-        for (int i = 0; i < gridDiv/2; i ++)
+        for (int i = 0; i < gridDiv/2.0; i ++)
         {
             Ky[i] = (i+1)*(2*PI)/((gridDiv*spacing));
             Ky[gridDiv-1-i] = -(i+1)*(2*PI)/((gridDiv*spacing));
@@ -157,6 +158,7 @@ int main()
                 //cout << rho[i][j] << "\n";
                 double temp = out[i*gridDiv+j][0];
                 fou << temp << "\n";
+                //cout << temp << "\n";
 		        double tempC = out[i*gridDiv+j][1];
                 temp = temp/(pow(Ky[j],2)+pow(Kx[i],2));
 		        tempC = tempC/(pow(Ky[j],2)+pow(Kx[i],2));
@@ -181,6 +183,7 @@ int main()
             }
         }
 
+        double psiSum = 0;
         for (int i = 0; i < gridDiv; i++)
         {
             for (int j = 0; j < gridDiv; j++)
@@ -204,14 +207,15 @@ int main()
                     yp = 0;
 
                 dpsix[i][j] = (rho[xp][j]-rho[xm][j])/(2*spacing);
-                //density << (rho[xp][j]-rho[xm][j])/(2*gridDiv)<<"\n";
                 dpsiy[i][j] = (rho[i][yp]-rho[i][ym])/(2*spacing);
                 fp<< rho[j][i]<<"\n";
+                psiSum += rho[j][i];
 
             }
 	    }
 
-        //cout << "rho counted";
+        energy *= psiSum;
+        cout << "rho counted\n";
 
         //cout << rhoTemp << " rho sum\n";                      //debugging//
 
@@ -247,6 +251,9 @@ int main()
         fftw_destroy_plan(r);
         fftw_free(in);
         fftw_free(out);
+        energy /= 2;
+        //cout << energy<< "\n";
+        energy = 0;
     }
 
     dust.clear();
