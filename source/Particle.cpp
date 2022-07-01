@@ -146,7 +146,7 @@ void Particle::move(double s, double size)
 
     x_pos += dX;
     y_pos += dY;
-    //std::cout<<accelX<<","<<dX<<"<-dX\n";
+    //std::cout<<dX<<"<-dX\n";
 
     resetAcc();
     accelX = 0;
@@ -155,19 +155,19 @@ void Particle::move(double s, double size)
 
     if(x_pos >= size)        //loop particle around periodically
     {
-        x_pos = x_pos-size;
+        x_pos = fmod(x_pos,size);
     }
     if(y_pos >= size)
     {
-        y_pos = y_pos-size;
+        y_pos = fmod(y_pos,size);
     }
     if(x_pos < 0)
     {
-        x_pos = x_pos+size;
+        x_pos = size - fmod(x_pos*-1.0,size);
     }
     if(y_pos < 0)
     {
-        y_pos = y_pos+size;
+        y_pos = size- fmod(x_pos*-1.0,size);
     }
 }
 

@@ -11,7 +11,7 @@
 using namespace std;
 #define ppc 10
 #define gridSize 10.0
-#define gridDiv 15
+#define gridDiv 50
 #define loopCount 100
 #define PI 3.14159265
 //#define particleCount 1600
@@ -43,7 +43,7 @@ int main()
     vector<vector<double>> rho(gridDiv, vector<double> (gridDiv));
     vector<vector<double>> dpsix(gridDiv, vector<double> (gridDiv));
     vector<vector<double>> dpsiy(gridDiv, vector<double> (gridDiv));
-    cout << "declared\n";
+    //cout << "declared\n";
 
     for (int i = 0; i < particleCount; i++)                      //set particle position
     {
@@ -86,8 +86,18 @@ int main()
             double sp = spacing;
 
             int iXm = floor(dust[i].getX()/sp);                 //calculate iXm & iXp
+            if (iXm >= gridDiv)
+            {
+                iXm -= gridDiv;
+                dust[i].setX(dust[i].getX()-(gridDiv*spacing));
+            }
+            if (iXm < 0)
+            {
+                iXm += gridDiv;
+                dust[i].setX(dust[i].getX()+(gridDiv*spacing));
+            }
             int iXp = iXm + 1;
-
+            //cout << iXm << "-";
             double wXm = 1- abs((dust[i].getX()/sp)-iXm);       //weight calculations
             double wXp = 1- abs((dust[i].getX()/sp)-iXp);
 
@@ -95,10 +105,21 @@ int main()
             {
                 iXp = iXp - gridDiv;
             }
+            //cout << iXp <<", ";
 
             int iYm = floor(dust[i].getY()/sp);                 //calculate iYm and iYp
+            if (iYm >= gridDiv)
+            {
+                iYm -= gridDiv;
+                dust[i].setY(dust[i].getY()-(gridDiv*spacing));
+            }
+             if (iYm < 0)
+            {
+                iYm += gridDiv;
+                dust[i].setY(dust[i].getY()+(gridDiv*spacing));
+            }
             int iYp = iYm + 1;
-
+            //cout << iYm <<"\n";
             double wYm = 1- abs((dust[i].getY()/sp)-iYm);       //wieght calculation
             double wYp = 1- abs((dust[i].getY()/sp)-iYp);
 
@@ -106,6 +127,7 @@ int main()
             {
                 iYp = iYp - gridDiv;
             }
+            //cout << iYp << "\n";
 
             //cout << iXm<<"\n";        
 
@@ -113,6 +135,7 @@ int main()
             rho[iXm][iYp] += ((wXm*wYp))/ppc;
             rho[iXp][iYm] += ((wXp*wYm))/ppc;
             rho[iXp][iYp] += ((wXp*wYp))/ppc;
+            //cout << i << "\n";
         }
 
 
@@ -244,7 +267,7 @@ int main()
                 //     cout <<"number "<< work_done << "counted\n";
             }
         }
-        //cout << "grav calc\n";
+        cout << "grav calc\n";
         //points.close();
         //density.close();
         fftw_destroy_plan(p);
