@@ -9,7 +9,7 @@
 #include <fftw3.h>
 
 using namespace std;
-#define ppc 1
+#define ppc 10
 #define gridSize (1*pow(10,-1))
 #define gridDiv 50
 #define loopCount 500
@@ -19,7 +19,6 @@ using namespace std;
 int main()
 {
     int particleCount = (ppc*pow((gridDiv),2));
-    //int particleCount = 5;
     double spacing = (double)gridSize/(double)(gridDiv);
     double E[3] = {0,0,0};
     double B[3] = {0,0,0};
@@ -56,6 +55,9 @@ int main()
     }
     for (int l = 0; l< loopCount; l++)                          //main loop
     {
+        double gEnergy = 0;
+        double kEnergy = 0;
+        energy = 0;
         fftw_plan p;
         fftw_plan r;
         fftw_complex *in, *out;
@@ -129,11 +131,13 @@ int main()
 
             //cout << iXm<<"\n";        
 
-            rho[iXm][iYm] += ((wXm*wYm)*G*M_PI*4)/ppc;                           //add weights to points
-            rho[iXm][iYp] += ((wXm*wYp)*G*M_PI*4)/ppc;
-            rho[iXp][iYm] += ((wXp*wYm)*G*M_PI*4)/ppc;
-            rho[iXp][iYp] += ((wXp*wYp)*G*M_PI*4)/ppc;
+            rho[iXm][iYm] += ((wXm*wYm))/ppc;                           //add weights to points
+            rho[iXm][iYp] += ((wXm*wYp))/ppc;
+            rho[iXp][iYm] += ((wXp*wYm))/ppc;
+            rho[iXp][iYp] += ((wXp*wYp))/ppc;
             //cout << i << "\n";
+
+            kEnergy += .5*dust[i].getMass()*pow(dust[i].getSpeed(),2);
         }
 
 
@@ -145,7 +149,7 @@ int main()
             for (int j = 0; j < gridDiv; j++)
             {
                 //cout << rho[i][j] << "\n";
-                in[j+i*gridDiv][0] = rho[i][j];  //add rho to fftw input
+                in[j+i*gridDiv][0] = rho[i][j]*G*M_PI*4;  //add rho to fftw input
                 data<<rho[j][i]<<"\n";
                 energy += rho[j][i];
                 in[j+i*gridDiv][1] = 0;
@@ -204,7 +208,6 @@ int main()
             }
         }
 
-        double psiSum = 0;
         for (int i = 0; i < gridDiv; i++)
         {
             for (int j = 0; j < gridDiv; j++)
@@ -230,12 +233,11 @@ int main()
                 dpsix[i][j] = ((psi[xp][j]-psi[xm][j]))/(2*spacing);
                 dpsiy[i][j] = ((psi[i][yp]-psi[i][ym]))/(2*spacing);
                 fp<< psi[j][i]<<"\n";
-                psiSum += rho[j][i];
-
+                gEnergy -= (0.5*rho[i][j]*psi[i][j])*pow(spacing,2);
             }
 	    }
 
-        energy *= psiSum;
+        pointTime << timeStep*l<<" "<< gEnergy<<"\n";
         //cout << "rho counted\n";
 
         //cout << rhoTemp << " rho sum\n";                      //debugging//
@@ -246,7 +248,7 @@ int main()
         {
            //points << dust[i].getX() << " "<<dust[i].getY()<<"\n"; //write particle 0's coordinatess to csv
            coor << dust[i].getX() << " "<<dust[i].getY()<<"\n";
-           pointTime << timeStep*l << " "<<  dust[0].getY() <<"\n";
+           //pointTime << timeStep*l << " "<<  dust[0].getY() <<"\n";
         }
 
         #pragma omp parallel for num_threads(6) schedule(static)//define parallel section
@@ -272,8 +274,8 @@ int main()
         fftw_destroy_plan(r);
         fftw_free(in);
         fftw_free(out);
-        energy /= 2;
-        //cout << energy<< "\n";
+        energy = kEnergy + gEnergy;
+        cout << energy<< "\n";
         energy = 0;
     }
 

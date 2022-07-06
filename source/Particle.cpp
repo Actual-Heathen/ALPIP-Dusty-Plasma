@@ -144,7 +144,7 @@ void Particle::move(double s, double size)
 
     x_pos += dX;
     y_pos += dY;
-    std::cout<<speed<<"<-speed\n";
+    //std::cout<<speed<<"<-speed\n";
 
     resetAcc();
     accelX = 0.0;
