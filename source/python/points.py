@@ -4,10 +4,10 @@ from matplotlib.animation import FuncAnimation
 plt.style.use('seaborn-pastel')
 
 fig = plt.figure()
-ax = plt.axes(xlim = (0,10/(1)),ylim = (0,10/(1)))
+ax = plt.axes(xlim = (0,1/(10)),ylim = (0,1/(10)))
 line, = ax.plot([],[],'.')
-f = open('../data/pointsF.d', 'r')
-particles = 4000
+f = open('data/pointsF.d', 'r')
+particles = 25000
 
 def init():
     line.set_data([],[])
@@ -23,6 +23,6 @@ def animate(i):
     line.set_data(dat[:,0],dat[:,1])
     return line,
 
-anim = FuncAnimation(fig,animate, init_func=init, frames = 100, interval = 20, blit = True)
+anim = FuncAnimation(fig,animate, init_func=init, frames = 500, interval = 20, blit = True)
 
-anim.save('../plots/points.gif',writer = 'imagemagick')
+anim.save('plots/points.gif',writer = 'imagemagick')

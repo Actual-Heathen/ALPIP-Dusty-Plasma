@@ -1,4 +1,4 @@
-TARGET = smallScaleTest
+TARGET = dustSimulation
 
 all:
 	$(MAKE) clean

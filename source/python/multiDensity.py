@@ -3,14 +3,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-d = open('../data/density.d', 'r')
-f = open('../data/fTransform.d', 'r')
-a = open('../data/aFTransform.d', 'r')
-p = open('../data/psi.d', 'r')
+d = open('data/density.d', 'r')
+f = open('data/fTransform.d', 'r')
+a = open('data/aFTransform.d', 'r')
+p = open('data/psi.d', 'r')
 
-N = 10
+N = 50
 N2 = N*N
-fr = (5)-2
+fr = (100)-2
 
 fig = plt.figure()
 
@@ -47,7 +47,7 @@ def update_anim(it):
 fig=plt.figure(figsize=(6,6))
 anim=animation.FuncAnimation(fig,update_anim,frames=fr,interval=20)
 
-anim.save('../plots/multiDensity.gif',writer = 'imagemagick')
+anim.save('plots/multiDensity.gif',writer = 'imagemagick')
 #plt.subplots_adjust(wspace=0.1,hspace=0.01, bottom=0,top=1)
 
 plt.close()
