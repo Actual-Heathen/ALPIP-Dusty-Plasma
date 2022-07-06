@@ -9,16 +9,17 @@
 #include <fftw3.h>
 
 using namespace std;
-#define ppc 10
-#define gridSize 10.0
+#define ppc 1
+#define gridSize (1*pow(10,-1))
 #define gridDiv 50
-#define loopCount 100
-#define PI 3.14159265
+#define loopCount 500
+#define G 6.6743*pow(10,-11)
 //#define particleCount 1600
 
 int main()
 {
     int particleCount = (ppc*pow((gridDiv),2));
+    //int particleCount = 5;
     double spacing = (double)gridSize/(double)(gridDiv);
     double E[3] = {0,0,0};
     double B[3] = {0,0,0};
@@ -41,13 +42,14 @@ int main()
 
     vector<Particle> dust;                                      //declare dust and point grid
     vector<vector<double>> rho(gridDiv, vector<double> (gridDiv));
+    vector<vector<double>> psi(gridDiv, vector<double> (gridDiv));
     vector<vector<double>> dpsix(gridDiv, vector<double> (gridDiv));
     vector<vector<double>> dpsiy(gridDiv, vector<double> (gridDiv));
     //cout << "declared\n";
 
     for (int i = 0; i < particleCount; i++)                      //set particle position
     {
-        Particle temp( ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv), ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv),1,0,0.0);
+        Particle temp( ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv), ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv),1,0.0,0.0);
         //Particle temp( 2.5, 0,1,-0.1,0.0);
         dust.push_back(temp);
         //cout << dust[i].getX() << " " << dust[i].getY() << "\n";
@@ -79,7 +81,7 @@ int main()
             }
 
         }
-        cout << "rho reset\n";
+        //cout << "rho reset\n";
 
         for (int i = 0; i < particleCount; i++)                  //calculate rho
         {
@@ -89,12 +91,10 @@ int main()
             if (iXm >= gridDiv)
             {
                 iXm -= gridDiv;
-                dust[i].setX(dust[i].getX()-(gridDiv*spacing));
             }
             if (iXm < 0)
             {
                 iXm += gridDiv;
-                dust[i].setX(dust[i].getX()+(gridDiv*spacing));
             }
             int iXp = iXm + 1;
             //cout << iXm << "-";
@@ -111,12 +111,10 @@ int main()
             if (iYm >= gridDiv)
             {
                 iYm -= gridDiv;
-                dust[i].setY(dust[i].getY()-(gridDiv*spacing));
             }
              if (iYm < 0)
             {
                 iYm += gridDiv;
-                dust[i].setY(dust[i].getY()+(gridDiv*spacing));
             }
             int iYp = iYm + 1;
             //cout << iYm <<"\n";
@@ -131,16 +129,16 @@ int main()
 
             //cout << iXm<<"\n";        
 
-            rho[iXm][iYm] += ((wXm*wYm))/ppc;                           //add weights to points
-            rho[iXm][iYp] += ((wXm*wYp))/ppc;
-            rho[iXp][iYm] += ((wXp*wYm))/ppc;
-            rho[iXp][iYp] += ((wXp*wYp))/ppc;
+            rho[iXm][iYm] += ((wXm*wYm)*G*M_PI*4)/ppc;                           //add weights to points
+            rho[iXm][iYp] += ((wXm*wYp)*G*M_PI*4)/ppc;
+            rho[iXp][iYm] += ((wXp*wYm)*G*M_PI*4)/ppc;
+            rho[iXp][iYp] += ((wXp*wYp)*G*M_PI*4)/ppc;
             //cout << i << "\n";
         }
 
 
 
-        cout << "rho set\n";
+        //cout << "rho set\n";
 
         for (int i = 0; i < gridDiv; i++)
         {
@@ -161,16 +159,16 @@ int main()
         Kx = (double*) malloc(sizeof(double)*gridDiv);
         for (int i = 0; i < gridDiv/2.0; i++)
         {
-            Kx[i] = (i+1)*(2*PI)/(gridDiv*spacing);
-            Kx[gridDiv-1-i] = -(i+1)*(2*PI)/((gridDiv*spacing));
+            Kx[i] = (i+1)*(2*M_PI)*(gridDiv*spacing);
+            Kx[gridDiv-1-i] = -(i+1)*(2*M_PI)*((gridDiv*spacing));
         }
 
         double *Ky;
         Ky = (double*) malloc(sizeof(double)*gridDiv);
         for (int i = 0; i < gridDiv/2.0; i ++)
         {
-            Ky[i] = (i+1)*(2*PI)/((gridDiv*spacing));
-            Ky[gridDiv-1-i] = -(i+1)*(2*PI)/((gridDiv*spacing));
+            Ky[i] = (i+1)*(2*M_PI)*((gridDiv*spacing));
+            Ky[gridDiv-1-i] = -(i+1)*(2*M_PI)*((gridDiv*spacing));
         }
 
 
@@ -201,7 +199,7 @@ int main()
         {
             for(int j = 0; j < gridDiv; j++)
             {
-                rho[i][j] = in[i*gridDiv+j][0];
+                psi[i][j] = in[i*gridDiv+j][0];
                 
             }
         }
@@ -229,16 +227,16 @@ int main()
                 if (j >= gridDiv-1)
                     yp = 0;
 
-                dpsix[i][j] = (rho[xp][j]-rho[xm][j])/(2*spacing);
-                dpsiy[i][j] = (rho[i][yp]-rho[i][ym])/(2*spacing);
-                fp<< rho[j][i]<<"\n";
+                dpsix[i][j] = ((psi[xp][j]-psi[xm][j]))/(2*spacing);
+                dpsiy[i][j] = ((psi[i][yp]-psi[i][ym]))/(2*spacing);
+                fp<< psi[j][i]<<"\n";
                 psiSum += rho[j][i];
 
             }
 	    }
 
         energy *= psiSum;
-        cout << "rho counted\n";
+        //cout << "rho counted\n";
 
         //cout << rhoTemp << " rho sum\n";                      //debugging//
 
@@ -257,7 +255,7 @@ int main()
             {
                 dust[i].addAcceleration(spacing, dpsix, dpsiy,E,B,timeStep);          //add Acceleration based on densities
                 //cout<<"accel\n";
-                dust[i].move(timeStep, gridDiv*spacing);              //move particle
+                dust[i].move(timeStep, gridSize);              //move particle
                 //cout<<"move\n";
 		        //cout <<"moved\n";
                 #pragma omp atomic
@@ -267,7 +265,7 @@ int main()
                 //     cout <<"number "<< work_done << "counted\n";
             }
         }
-        cout << "grav calc\n";
+        //cout << "grav calc\n";
         //points.close();
         //density.close();
         fftw_destroy_plan(p);

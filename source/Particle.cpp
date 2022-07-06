@@ -95,7 +95,7 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
         iYp = iYp - dpsiy.size();
     }
 
-    //std::cout <<"yxmp\n";
+    //std::cout <<iYm << "," <<iXp<<"yxmp\n";
 
     double dX = wXm*wYm*dpsix[iXm][iYm];
     double dY = wXm*wYm*dpsiy[iXm][iYm];
@@ -127,8 +127,6 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
     accelX += dX;
     accelY += dY;
 
-    //std::cout <<accelX<<"\n";
-
 }
 
 void Particle::move(double s, double size)
@@ -146,12 +144,12 @@ void Particle::move(double s, double size)
 
     x_pos += dX;
     y_pos += dY;
-    //std::cout<<dX<<"<-dX\n";
+    std::cout<<speed<<"<-speed\n";
 
     resetAcc();
-    accelX = 0;
-    accelY = 0;
-    accel = 0;
+    accelX = 0.0;
+    accelY = 0.0;
+    accel = 0.0;
 
     if(x_pos >= size)        //loop particle around periodically
     {
@@ -167,7 +165,7 @@ void Particle::move(double s, double size)
     }
     if(y_pos < 0)
     {
-        y_pos = size- fmod(x_pos*-1.0,size);
+        y_pos = size- fmod(y_pos*-1.0,size);
     }
 }
 
