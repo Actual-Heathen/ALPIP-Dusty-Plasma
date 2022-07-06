@@ -14,10 +14,10 @@ class Particle
         void move(double s, double size);
         void resetAcc();
         void resetVel();
-    private:
         void setX(long double x);
         void setY(long double y);
         void setMass(long double m);
+    private:
 
         double x_pos;
         double y_pos;
