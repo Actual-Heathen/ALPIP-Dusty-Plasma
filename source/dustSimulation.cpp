@@ -9,16 +9,16 @@
 #include <fftw3.h>
 
 using namespace std;
-#define ppc .0004
+#define ppc 1
 #define gridSize (1*pow(10,-1))
 #define gridDiv 50
-#define loopCount 500
-#define G 6.6743*pow(10,-11)
+#define loopCount 2000
+#define G (6.6743*pow(10,-11))
 
 int main()
 {
-    //int particleCount = (ppc*pow((gridDiv),2));
-    int particleCount = 2;
+    int particleCount = (ppc*pow((gridDiv),2));
+    //int particleCount = 2;
     double spacing = (double)gridSize/(double)(gridDiv);
     double E[3] = {0,0,0};
     double B[3] = {0,0,0};
@@ -29,9 +29,13 @@ int main()
     ofstream data;                                              //open data files
     ofstream coor;
     ofstream pointTime;
+    ofstream energyPlt;
+    ofstream energy2;
     data.open("data/density.d");
     coor.open("data/pointsF.d");
     pointTime.open("data/pointTime.d");
+    energyPlt.open("data/energy.d");
+    energy2.open("data/energy2.d");
     ofstream fou;                                              //open data files
     ofstream adj;
     fou.open("data/fTransform.d");
@@ -276,7 +280,9 @@ int main()
         fftw_free(out);
         energy = kEnergy + gEnergy;
         cout << gEnergy<< ", "<< kEnergy << "\n";
-        pointTime << timeStep*l<<" "<< energy<<"\n";
+        pointTime << timeStep*l<<" "<< gEnergy<<"\n";
+        energyPlt << timeStep*l<<" "<< energy<<"\n";
+        energy2 << timeStep*l<<" "<< kEnergy<<"\n";
         energy = 0;
     }
 
