@@ -9,16 +9,16 @@
 #include <fftw3.h>
 
 using namespace std;
-#define ppc 10
+#define ppc .0004
 #define gridSize (1*pow(10,-1))
 #define gridDiv 50
 #define loopCount 500
 #define G 6.6743*pow(10,-11)
-//#define particleCount 1600
 
 int main()
 {
-    int particleCount = (ppc*pow((gridDiv),2));
+    //int particleCount = (ppc*pow((gridDiv),2));
+    int particleCount = 2;
     double spacing = (double)gridSize/(double)(gridDiv);
     double E[3] = {0,0,0};
     double B[3] = {0,0,0};
@@ -45,7 +45,7 @@ int main()
     vector<vector<double>> dpsix(gridDiv, vector<double> (gridDiv));
     vector<vector<double>> dpsiy(gridDiv, vector<double> (gridDiv));
     //cout << "declared\n";
-
+    cout << particleCount << "\n";
     for (int i = 0; i < particleCount; i++)                      //set particle position
     {
         Particle temp( ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv), ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv),1,0.0,0.0);
@@ -53,6 +53,7 @@ int main()
         dust.push_back(temp);
         //cout << dust[i].getX() << " " << dust[i].getY() << "\n";
     }
+    
     for (int l = 0; l< loopCount; l++)                          //main loop
     {
         double gEnergy = 0;
@@ -151,7 +152,6 @@ int main()
                 //cout << rho[i][j] << "\n";
                 in[j+i*gridDiv][0] = rho[i][j]*G*M_PI*4;  //add rho to fftw input
                 data<<rho[j][i]<<"\n";
-                energy += rho[j][i];
                 in[j+i*gridDiv][1] = 0;
                 //density << rho[j][i]<<"\n";                        //add grid values to file
             }
@@ -233,11 +233,11 @@ int main()
                 dpsix[i][j] = ((psi[xp][j]-psi[xm][j]))/(2*spacing);
                 dpsiy[i][j] = ((psi[i][yp]-psi[i][ym]))/(2*spacing);
                 fp<< psi[j][i]<<"\n";
-                gEnergy -= (0.5*rho[i][j]*psi[i][j])*pow(spacing,2);
+                gEnergy += (-1.0*0.5*rho[i][j]*psi[i][j]*spacing*spacing);
             }
 	    }
 
-        pointTime << timeStep*l<<" "<< gEnergy<<"\n";
+        
         //cout << "rho counted\n";
 
         //cout << rhoTemp << " rho sum\n";                      //debugging//
@@ -275,7 +275,8 @@ int main()
         fftw_free(in);
         fftw_free(out);
         energy = kEnergy + gEnergy;
-        cout << energy<< "\n";
+        cout << gEnergy<< ", "<< kEnergy << "\n";
+        pointTime << timeStep*l<<" "<< energy<<"\n";
         energy = 0;
     }
 
