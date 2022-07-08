@@ -10,9 +10,9 @@
 
 using namespace std;
 #define ppc 1
-#define gridSize (1*pow(10,-1))
+#define gridSize (1.5*pow(10,100))
 #define gridDiv 50
-#define loopCount 2000
+#define loopCount 1000
 #define G (6.6743*pow(10,-11))
 
 int main()
@@ -154,7 +154,7 @@ int main()
             for (int j = 0; j < gridDiv; j++)
             {
                 //cout << rho[i][j] << "\n";
-                in[j+i*gridDiv][0] = rho[i][j]*G*M_PI*4;  //add rho to fftw input
+                in[j+i*gridDiv][0] = rho[i][j];  //add rho to fftw input
                 data<<rho[j][i]<<"\n";
                 in[j+i*gridDiv][1] = 0;
                 //density << rho[j][i]<<"\n";                        //add grid values to file
@@ -167,16 +167,16 @@ int main()
         Kx = (double*) malloc(sizeof(double)*gridDiv);
         for (int i = 0; i < gridDiv/2.0; i++)
         {
-            Kx[i] = (i+1)*(2*M_PI)*(gridDiv*spacing);
-            Kx[gridDiv-1-i] = -(i+1)*(2*M_PI)*((gridDiv*spacing));
+            Kx[i] = (2*i*M_PI)/(gridSize);
+            Kx[gridDiv-1-i] = -(i+1)*(2*M_PI)/((gridSize));
         }
 
         double *Ky;
         Ky = (double*) malloc(sizeof(double)*gridDiv);
         for (int i = 0; i < gridDiv/2.0; i ++)
         {
-            Ky[i] = (i+1)*(2*M_PI)*((gridDiv*spacing));
-            Ky[gridDiv-1-i] = -(i+1)*(2*M_PI)*((gridDiv*spacing));
+            Ky[i] = (2*i*M_PI)/(gridSize);
+            Ky[gridDiv-1-i] = -(i+1)*(2*M_PI)/((gridSize));
         }
 
 
@@ -189,8 +189,11 @@ int main()
                 fou << temp << "\n";
                 //cout << temp << "\n";
 		        double tempC = out[i*gridDiv+j][1];
-                temp = temp/(pow(Ky[j],2)+pow(Kx[i],2));
-		        tempC = tempC/(pow(Ky[j],2)+pow(Kx[i],2));
+                if (Ky[j] != 0 || Kx[i] != 0)
+                {
+                    temp = temp/(pow(Ky[j],2)+pow(Kx[i],2));
+                    tempC = tempC/(pow(Ky[j],2)+pow(Kx[i],2));
+                }
 
 		        out[i*gridDiv +j][0] = temp;
                 adj << temp<<"\n";
@@ -237,7 +240,7 @@ int main()
                 dpsix[i][j] = ((psi[xp][j]-psi[xm][j]))/(2*spacing);
                 dpsiy[i][j] = ((psi[i][yp]-psi[i][ym]))/(2*spacing);
                 fp<< psi[j][i]<<"\n";
-                gEnergy += (-1.0*0.5*rho[i][j]*psi[i][j]*spacing*spacing);
+                gEnergy += (0.5*rho[i][j]*psi[i][j]*spacing*spacing);
             }
 	    }
 
@@ -279,9 +282,9 @@ int main()
         fftw_free(in);
         fftw_free(out);
         energy = kEnergy + gEnergy;
-        cout << gEnergy<< ", "<< kEnergy << "\n";
-        pointTime << timeStep*l<<" "<< gEnergy<<"\n";
-        energyPlt << timeStep*l<<" "<< energy<<"\n";
+        //cout << gEnergy<< ", "<< kEnergy << "\n";
+        pointTime << timeStep*l<<" "<< dust[0].getSpeed()<<"\n";
+        energyPlt << timeStep*l<<" "<< gEnergy<<"\n";
         energy2 << timeStep*l<<" "<< kEnergy<<"\n";
         energy = 0;
     }

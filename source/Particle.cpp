@@ -90,6 +90,8 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
     double wYm = 1- abs((y_pos/spacing)-iYm);       //wieght calculation
     double wYp = 1- abs((y_pos/spacing)-iYp);
 
+    //std::cout << dpsix[iXm][iYm] << "wXm\n"; 
+
     if (iYp >= dpsiy.size())                                 //ghost region adjust
     {
         iYp = iYp - dpsiy.size();
@@ -100,8 +102,8 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
     double dX = wXm*wYm*dpsix[iXm][iYm];
     double dY = wXm*wYm*dpsiy[iXm][iYm];
 
-    accelX += dX;
-    accelY += dY;
+    accelX = dX;
+    accelY = dY;
     //std::cout <<"mm\n";
 
     dX = wXm*wYp*dpsix[iXm][iYp];
@@ -131,20 +133,17 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
 
 void Particle::move(double s, double size)
 {
-     // using d= v0t+ 1/2at^2 to calculate distance traveled
-    long double dX = velX*s + .5*accelX*s*s;
-    long double dY = velY*s + .5*accelY*s*s;
+    velX += accelX * s;
+    velY += accelX * s;
 
-    long double xV = dX/s;
-    long double yV = dY/s;
+    accelX += velX * s;
+    accelY += velY * s;
 
-    velX = xV;
-    velY = yV;
-    speed = sqrt(xV*xV + yV*yV);
+    speed = sqrt(pow(velX,2) + pow(velY, 2));
 
-    x_pos += dX;
-    y_pos += dY;
-    //std::cout<<speed<<"<-speed\n";
+    x_pos += velX*s;
+    y_pos += velY*s;
+ 
 
     resetAcc();
     accelX = 0.0;
