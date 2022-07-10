@@ -10,7 +10,7 @@
 
 using namespace std;
 #define ppc 1
-#define gridSize (1.5*pow(10,100))
+#define gridSize (1*pow(10,0))
 #define gridDiv 50
 #define loopCount 1000
 #define G (6.6743*pow(10,-11))
@@ -210,7 +210,7 @@ int main()
         {
             for(int j = 0; j < gridDiv; j++)
             {
-                psi[i][j] = in[i*gridDiv+j][0];
+                psi[i][j] = in[i*gridDiv+j][0]/pow(gridDiv,2);
                 
             }
         }
@@ -283,8 +283,8 @@ int main()
         fftw_free(out);
         energy = kEnergy + gEnergy;
         //cout << gEnergy<< ", "<< kEnergy << "\n";
-        pointTime << timeStep*l<<" "<< dust[0].getSpeed()<<"\n";
-        energyPlt << timeStep*l<<" "<< gEnergy<<"\n";
+        energyPlt << timeStep*l<<" "<< dust[0].getSpeed()<<"\n";
+        pointTime << timeStep*l<<" "<< gEnergy<<"\n";
         energy2 << timeStep*l<<" "<< kEnergy<<"\n";
         energy = 0;
     }

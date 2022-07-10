@@ -4,10 +4,10 @@ from matplotlib.animation import FuncAnimation
 plt.style.use('seaborn-pastel')
 
 fig = plt.figure()
-ax = plt.axes(xlim = (0,1/(10)),ylim = (0,1/(10)))
+ax = plt.axes(xlim = (0,1/(1)),ylim = (0,1/(1)))
 line, = ax.plot([],[],'.')
 f = open('data/pointsF.d', 'r')
-particles = 25000
+particles = 2500
 
 def init():
     line.set_data([],[])
