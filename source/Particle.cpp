@@ -134,7 +134,7 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
 void Particle::move(double s, double size)
 {
     velX += accelX * s;
-    velY += accelX * s;
+    velY += accelY * s;
 
     accelX += velX * s;
     accelY += velY * s;
