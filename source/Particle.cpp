@@ -64,14 +64,6 @@ long double Particle::getSpeed()
 
 void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> dpsix, std::vector<std::vector<double>> dpsiy, double E[3], double B[3], double time)
 {
-    double vM[3] = {velX + (charge/mass)*E[0]*(time/2), velY + (charge/mass)*E[1]*(time/2),(charge/mass)*E[2]*(time/2)};
-    double T[3] = {(charge/mass)*B[0]*(time/2),(charge/mass)*B[1]*(time/2),(charge/mass)*B[2]*(time/2)};
-    double vS[3] = {vM[0]+vM[1]*T[2]-vM[2]*T[1], vM[1]+vM[2]*T[0]-vM[0]*T[2], vM[2]+vM[0]*T[1]-vM[1]*T[0]};
-    double S[3] = {(2*T[0])/(1+pow(T[0],2)), (2*T[1])/(1+pow(T[1],2)), (2*T[2])/(1+pow(T[2],2))};
-    double vP[3] = {vM[0]+vS[1]*S[2]-vS[2]*S[1], vM[1]+vS[2]*S[0]-vS[0]*S[2], vM[2]+vS[0]*S[1]-vS[1]*S[0]};
-
-    velX = vP[0] + (charge/mass)*E[0]*(time/2);
-    velY = vP[1] + (charge/mass)*E[1]*(time/2);
 
     int iXm = floor(x_pos/spacing);                 //calculate iXm & iXp
     int iXp = iXm + 1;
@@ -129,17 +121,28 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
     accelX += dX;
     accelY += dY;
 
+    double vM[3] = {velX + (charge/mass)*(E[0]+accelX)*(time/2), velY + (charge/mass)*(E[1]+accelY)*(time/2),velZ + (charge/mass)*E[2]*(time/2)};
+    double T[3] = {(charge/mass)*B[0]*(time/2),(charge/mass)*B[1]*(time/2),(charge/mass)*B[2]*(time/2)};
+    double vS[3] = {vM[0]+vM[1]*T[2]-vM[2]*T[1], vM[1]+vM[2]*T[0]-vM[0]*T[2], vM[2]+vM[0]*T[1]-vM[1]*T[0]};
+    double S[3] = {(2*T[0])/(1+pow(T[0],2)), (2*T[1])/(1+pow(T[1],2)), (2*T[2])/(1+pow(T[2],2))};
+    double vP[3] = {vM[0]+vS[1]*S[2]-vS[2]*S[1], vM[1]+vS[2]*S[0]-vS[0]*S[2], vM[2]+vS[0]*S[1]-vS[1]*S[0]};
+
+    velX = vP[0] + (charge/mass)*(E[0]+accelX)*(time/2);
+    velY = vP[1] + (charge/mass)*(E[1]+accelY)*(time/2);
+    velZ = vP[2] + (charge/mass)*(E[2]+accelZ)*(time/2);
+    
+
+    speed = sqrt(pow(velX,2) + pow(velY, 2) + pow(velZ, 2));
+
 }
 
 void Particle::move(double s, double size)
 {
-    velX += accelX * s;
-    velY += accelY * s;
 
     accelX += velX * s;
     accelY += velY * s;
 
-    speed = sqrt(pow(velX,2) + pow(velY, 2));
+    
 
     x_pos += velX*s;
     y_pos += velY*s;

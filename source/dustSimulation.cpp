@@ -10,7 +10,7 @@
 
 using namespace std;
 #define ppc 1
-#define gridSize (1*pow(10,0))
+#define gridSize (50*pow(10,0))
 #define gridDiv 50
 #define loopCount 1000
 #define G (6.6743*pow(10,-11))
@@ -18,10 +18,10 @@ using namespace std;
 int main()
 {
     int particleCount = (ppc*pow((gridDiv),2));
-    //int particleCount = 2;
+    //int particleCount = 25;
     double spacing = (double)gridSize/(double)(gridDiv);
     double E[3] = {0,0,0};
-    double B[3] = {0,0,0};
+    double B[3] = {1,0,0};
     double timeStep = .1;
     srand(time(NULL));                                          //seed random number generator
     double energy = 0;
@@ -240,7 +240,7 @@ int main()
                 dpsix[i][j] = ((psi[xp][j]-psi[xm][j]))/(2*spacing);
                 dpsiy[i][j] = ((psi[i][yp]-psi[i][ym]))/(2*spacing);
                 fp<< psi[j][i]<<"\n";
-                gEnergy += (0.5*rho[i][j]*psi[i][j]*spacing*spacing);
+                gEnergy += (-0.5*rho[i][j]*psi[i][j]);
             }
 	    }
 
@@ -283,7 +283,7 @@ int main()
         fftw_free(out);
         energy = kEnergy + gEnergy;
         //cout << gEnergy<< ", "<< kEnergy << "\n";
-        energyPlt << timeStep*l<<" "<< dust[0].getSpeed()<<"\n";
+        energyPlt << timeStep*l<<" "<< energy <<"\n";
         pointTime << timeStep*l<<" "<< gEnergy<<"\n";
         energy2 << timeStep*l<<" "<< kEnergy<<"\n";
         energy = 0;

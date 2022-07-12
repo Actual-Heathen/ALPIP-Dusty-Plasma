@@ -25,8 +25,10 @@ class Particle
         double speed = 0;
         double velX = 0;
         double velY = 0;
+        double velZ = 0;
         double accel = 0;
         double accelX = 0;
         double accelY = 0;
+        double accelZ = 0;
         double charge;
 };
