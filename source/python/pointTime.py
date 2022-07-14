@@ -6,7 +6,7 @@ plt.style.use('seaborn-pastel')
 
 fig = plt.figure()
 ax = plt.axes()
-#line, = ax.plot([],[],'.')
+line, = ax.plot([],[],'.')
 f = open('data/pointTime.d', 'r')
 dat=np.fromfile(f,dtype='float64', sep=" ").reshape(-1,2)
 f1 = open('data/energy.d', 'r')

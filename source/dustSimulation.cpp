@@ -9,8 +9,8 @@
 #include <fftw3.h>
 
 using namespace std;
-#define ppc 1
-#define gridSize (50*pow(10,0))
+#define ppc 500
+#define gridSize (1)
 #define gridDiv 50
 #define loopCount 1000
 #define G (6.6743*pow(10,-11))
@@ -60,6 +60,7 @@ int main()
     
     for (int l = 0; l< loopCount; l++)                          //main loop
     {
+        cout << l << "\n";
         double gEnergy = 0;
         double kEnergy = 0;
         energy = 0;
@@ -142,7 +143,7 @@ int main()
             rho[iXp][iYp] += ((wXp*wYp))/ppc;
             //cout << i << "\n";
 
-            kEnergy += .5*dust[i].getMass()*pow(dust[i].getSpeed(),2);
+            kEnergy += .5*dust[i].getMass()*pow(dust[i].getSpeed(),2)/ppc;
         }
 
 
@@ -254,7 +255,7 @@ int main()
         for (int i = 0; i < particleCount; i++)
         {
            //points << dust[i].getX() << " "<<dust[i].getY()<<"\n"; //write particle 0's coordinatess to csv
-           coor << dust[i].getX() << " "<<dust[i].getY()<<"\n";
+           //coor << dust[i].getX() << " "<<dust[i].getY()<<"\n";
            //pointTime << timeStep*l << " "<<  dust[0].getY() <<"\n";
         }
 
@@ -287,6 +288,7 @@ int main()
         pointTime << timeStep*l<<" "<< gEnergy<<"\n";
         energy2 << timeStep*l<<" "<< kEnergy<<"\n";
         energy = 0;
+
     }
 
     dust.clear();
