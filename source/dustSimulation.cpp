@@ -9,20 +9,20 @@
 #include <fftw3.h>
 
 using namespace std;
-#define ppc 1
+#define ppc 100
 #define gridSize (1)
 #define gridDiv 50
 #define loopCount 2000
 #define G (6.6743*pow(10,-11))
-
+#define threads 12
 int main()
 {
     int particleCount = (ppc*pow((gridDiv),2));
     //int particleCount = 25;
     double spacing = (double)gridSize/(double)(gridDiv);
     double E[3] = {0,0,0};
-    double B[3] = {0,0,1};
-    double timeStep = .05;
+    double B[3] = {0,0,0};
+    double timeStep = .01;
     srand(time(NULL));                                          //seed random number generator
     double energy = 0;
     double meanRho = 0;
@@ -51,13 +51,14 @@ int main()
     vector<vector<double>> dpsiy(gridDiv, vector<double> (gridDiv));
     //cout << "declared\n";
     cout << particleCount << "\n";
-    for (int i = 0; i < particleCount; i++)                      //set particle position
-    {
-        Particle temp( ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv), ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv),1,0.0,0.0);
-        //Particle temp( 2.5, 0,1,-0.1,0.0);
-        dust.push_back(temp);
-        //cout << dust[i].getX() << " " << dust[i].getY() << "\n";
-    }
+
+        for (int i = 0; i < particleCount; i++)                      //set particle position
+        {
+            Particle temp( ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv), ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv),1,0.0,0.0);
+            //Particle temp( 2.5, 0,1,-0.1,0.0);
+            dust.push_back(temp);
+            //cout << dust[i].getX() << " " << dust[i].getY() << "\n";
+        }
     
     for (int l = 0; l< loopCount; l++)                          //main loop
     {
@@ -81,72 +82,73 @@ int main()
 
         //cout << "dec\n";
 
-
-        for (int i = 0; i < gridDiv; i++)                       //initialize/reset  point grid
+        #pragma omp parallel for num_threads(threads) schedule(static)
         {
-            for (int j = 0; j < gridDiv; j++)
+            for (int i = 0; i < gridDiv; i++)                       //initialize/reset  point grid
             {
-                rho[i][j] = 0.0;
-            }
+                for (int j = 0; j < gridDiv; j++)
+                {
+                    rho[i][j] = 0.0;
+                }
 
+            }
         }
         //cout << "rho reset\n";
 
-        for (int i = 0; i < particleCount; i++)                  //calculate rho
-        {
-            double sp = spacing;
-
-            int iXm = floor(dust[i].getX()/sp);                 //calculate iXm & iXp
-            if (iXm >= gridDiv)
+            for (int i = 0; i < particleCount; i++)                  //calculate rho
             {
-                iXm -= gridDiv;
+                double sp = spacing;
+
+                int iXm = floor(dust[i].getX()/sp);                 //calculate iXm & iXp
+                if (iXm >= gridDiv)
+                {
+                    iXm -= gridDiv;
+                }
+                if (iXm < 0)
+                {
+                    iXm += gridDiv;
+                }
+                int iXp = iXm + 1;
+                //cout << iXm << "-";
+                double wXm = 1- abs((dust[i].getX()/sp)-iXm);       //weight calculations
+                double wXp = 1- abs((dust[i].getX()/sp)-iXp);
+
+                if (iXp >= gridDiv)                                 //adjust iXp if in "ghost region"
+                {
+                    iXp = iXp - gridDiv;
+                }
+                //cout << iXp <<", ";
+
+                int iYm = floor(dust[i].getY()/sp);                 //calculate iYm and iYp
+                if (iYm >= gridDiv)
+                {
+                    iYm -= gridDiv;
+                }
+                if (iYm < 0)
+                {
+                    iYm += gridDiv;
+                }
+                int iYp = iYm + 1;
+                //cout << iYm <<"\n";
+                double wYm = 1- abs((dust[i].getY()/sp)-iYm);       //wieght calculation
+                double wYp = 1- abs((dust[i].getY()/sp)-iYp);
+
+                if (iYp >= gridDiv)                                 //ghost region adjust
+                {
+                    iYp = iYp - gridDiv;
+                }
+                //cout << iYp << "\n";
+
+                //cout << iXm<<"\n";        
+
+                rho[iXm][iYm] += ((wXm*wYm))/ppc;                           //add weights to points
+                rho[iXm][iYp] += ((wXm*wYp))/ppc;
+                rho[iXp][iYm] += ((wXp*wYm))/ppc;
+                rho[iXp][iYp] += ((wXp*wYp))/ppc;
+                //cout << i << "\n";
+
+                kEnergy += .5*dust[i].getMass()*pow(dust[i].getSpeed(),2)/ppc;
             }
-            if (iXm < 0)
-            {
-                iXm += gridDiv;
-            }
-            int iXp = iXm + 1;
-            //cout << iXm << "-";
-            double wXm = 1- abs((dust[i].getX()/sp)-iXm);       //weight calculations
-            double wXp = 1- abs((dust[i].getX()/sp)-iXp);
-
-            if (iXp >= gridDiv)                                 //adjust iXp if in "ghost region"
-            {
-                iXp = iXp - gridDiv;
-            }
-            //cout << iXp <<", ";
-
-            int iYm = floor(dust[i].getY()/sp);                 //calculate iYm and iYp
-            if (iYm >= gridDiv)
-            {
-                iYm -= gridDiv;
-            }
-             if (iYm < 0)
-            {
-                iYm += gridDiv;
-            }
-            int iYp = iYm + 1;
-            //cout << iYm <<"\n";
-            double wYm = 1- abs((dust[i].getY()/sp)-iYm);       //wieght calculation
-            double wYp = 1- abs((dust[i].getY()/sp)-iYp);
-
-            if (iYp >= gridDiv)                                 //ghost region adjust
-            {
-                iYp = iYp - gridDiv;
-            }
-            //cout << iYp << "\n";
-
-            //cout << iXm<<"\n";        
-
-            rho[iXm][iYm] += ((wXm*wYm))/ppc;                           //add weights to points
-            rho[iXm][iYp] += ((wXm*wYp))/ppc;
-            rho[iXp][iYm] += ((wXp*wYm))/ppc;
-            rho[iXp][iYp] += ((wXp*wYp))/ppc;
-            //cout << i << "\n";
-
-            kEnergy += .5*dust[i].getMass()*pow(dust[i].getSpeed(),2)/ppc;
-        }
-
 
 
         //cout << "rho set\n";
@@ -169,21 +171,20 @@ int main()
         fftw_execute(p);        //Execute the FFT
         //calculate Kx, Ky//
         double *Kx;
-        Kx = (double*) malloc(sizeof(double)*gridDiv);
-        for (int i = 0; i < gridDiv/2.0; i++)
-        {
-            Kx[i] = (2*i*M_PI)/(gridSize);
-            Kx[gridDiv-1-i] = -(i+1)*(2*M_PI)/((gridSize));
-        }
-
         double *Ky;
+        Kx = (double*) malloc(sizeof(double)*gridDiv);
         Ky = (double*) malloc(sizeof(double)*gridDiv);
-        for (int i = 0; i < gridDiv/2.0; i ++)
-        {
-            Ky[i] = (2*i*M_PI)/(gridSize);
-            Ky[gridDiv-1-i] = -(i+1)*(2*M_PI)/((gridSize));
-        }
 
+        #pragma omp parallel for num_threads(threads) schedule(static)
+        {
+            for (int i = 0; i < gridDiv/2.0; i++)
+            {
+                Kx[i] = (2*i*M_PI)/(gridSize);
+                Kx[gridDiv-1-i] = -(i+1)*(2*M_PI)/((gridSize));
+                Ky[i] = (2*i*M_PI)/(gridSize);
+                Ky[gridDiv-1-i] = -(i+1)*(2*M_PI)/((gridSize));
+            }
+        }
 
         for (int i = 0; i < gridDiv; i++)
         {
@@ -214,12 +215,16 @@ int main()
 
 
         fftw_execute(r);
-        for (int i = 0; i < gridDiv;i++)
+
+        #pragma omp parallel for num_threads(threads) schedule(static)
         {
-            for(int j = 0; j < gridDiv; j++)
+            for (int i = 0; i < gridDiv;i++)
             {
-                psi[i][j] = in[i*gridDiv+j][0]/pow(gridDiv,2);
-                
+                for(int j = 0; j < gridDiv; j++)
+                {
+                    psi[i][j] = in[i*gridDiv+j][0]/pow(gridDiv,2);
+                    
+                }
             }
         }
 
@@ -259,14 +264,14 @@ int main()
 
         int work_done = 0;  //in paralell serial counter
 
-        for (int i = 0; i < particleCount; i++)
-        {
-           //points << dust[i].getX() << " "<<dust[i].getY()<<"\n"; //write particle 0's coordinatess to csv
-           //coor << dust[i].getX() << " "<<dust[i].getY()<<"\n";
-           //pointTime << timeStep*l << " "<<  dust[0].getY() <<"\n";
-        }
+        // for (int i = 0; i < particleCount; i++)
+        // {
+        //    //points << dust[i].getX() << " "<<dust[i].getY()<<"\n"; //write particle 0's coordinatess to csv
+        //    //coor << dust[i].getX() << " "<<dust[i].getY()<<"\n";
+        //    //pointTime << timeStep*l << " "<<  dust[0].getY() <<"\n";
+        // }
 
-        #pragma omp parallel for num_threads(6) schedule(static)//define parallel section
+        #pragma omp parallel for num_threads(threads) schedule(static)//define parallel section
         {
             for (int i = 0; i < particleCount; i++)              //calculate gravity
             {
@@ -291,7 +296,7 @@ int main()
         fftw_free(out);
         energy = kEnergy + gEnergy;
         //cout << gEnergy<< ", "<< kEnergy << "\n";
-        energyPlt << timeStep*l<<" "<< meanRho <<"\n";
+        energyPlt << timeStep*l<<" "<< energy <<"\n";
         pointTime << timeStep*l<<" "<< gEnergy<<"\n";
         energy2 << timeStep*l<<" "<< kEnergy<<"\n";
         energy = 0;
