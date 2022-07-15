@@ -10,7 +10,7 @@ p = open('data/psi.d', 'r')
 
 N = 50
 N2 = N*N
-fr = (100)-2
+fr = (200)-2
 
 fig = plt.figure()
 

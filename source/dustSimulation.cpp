@@ -9,10 +9,10 @@
 #include <fftw3.h>
 
 using namespace std;
-#define ppc 500
+#define ppc 1
 #define gridSize (1)
 #define gridDiv 50
-#define loopCount 1000
+#define loopCount 2000
 #define G (6.6743*pow(10,-11))
 
 int main()
@@ -21,10 +21,11 @@ int main()
     //int particleCount = 25;
     double spacing = (double)gridSize/(double)(gridDiv);
     double E[3] = {0,0,0};
-    double B[3] = {1,0,0};
-    double timeStep = .1;
+    double B[3] = {0,0,1};
+    double timeStep = .05;
     srand(time(NULL));                                          //seed random number generator
     double energy = 0;
+    double meanRho = 0;
 
     ofstream data;                                              //open data files
     ofstream coor;
@@ -158,9 +159,12 @@ int main()
                 in[j+i*gridDiv][0] = rho[i][j];  //add rho to fftw input
                 data<<rho[j][i]<<"\n";
                 in[j+i*gridDiv][1] = 0;
+                meanRho += pow(rho[i][j], 2);
                 //density << rho[j][i]<<"\n";                        //add grid values to file
             }
         }
+
+        meanRho /= pow(gridDiv, 2);
 
         fftw_execute(p);        //Execute the FFT
         //calculate Kx, Ky//
@@ -196,12 +200,15 @@ int main()
                     tempC = tempC/(pow(Ky[j],2)+pow(Kx[i],2));
                 }
 
+
 		        out[i*gridDiv +j][0] = temp;
                 adj << temp<<"\n";
 		        out[i*gridDiv+j][1] = tempC;
 		        
             }
         }
+        out[0][0] = 0;
+        out[0][1] = 0;
         delete[] Kx;
         delete[] Ky;
 
@@ -284,10 +291,11 @@ int main()
         fftw_free(out);
         energy = kEnergy + gEnergy;
         //cout << gEnergy<< ", "<< kEnergy << "\n";
-        energyPlt << timeStep*l<<" "<< energy <<"\n";
+        energyPlt << timeStep*l<<" "<< meanRho <<"\n";
         pointTime << timeStep*l<<" "<< gEnergy<<"\n";
         energy2 << timeStep*l<<" "<< kEnergy<<"\n";
         energy = 0;
+        meanRho = 0;
 
     }
 

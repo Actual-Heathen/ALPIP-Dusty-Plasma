@@ -121,7 +121,7 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
     accelX += dX;
     accelY += dY;
 
-    double vM[3] = {velX + (charge/mass)*(E[0]+accelX)*(time/2), velY + (charge/mass)*(E[1]+accelY)*(time/2),velZ + (charge/mass)*E[2]*(time/2)};
+    double vM[3] = {velX + ((charge/mass)*E[0]+accelX)*(time/2), velY + ((charge/mass)*E[1]+accelY)*(time/2),velZ + ((charge/mass)*E[2]+accelZ)*(time/2)};
     double T[3] = {(charge/mass)*B[0]*(time/2),(charge/mass)*B[1]*(time/2),(charge/mass)*B[2]*(time/2)};
     double vS[3] = {vM[0]+vM[1]*T[2]-vM[2]*T[1], vM[1]+vM[2]*T[0]-vM[0]*T[2], vM[2]+vM[0]*T[1]-vM[1]*T[0]};
     double S[3] = {(2*T[0])/(1+pow(T[0],2)), (2*T[1])/(1+pow(T[1],2)), (2*T[2])/(1+pow(T[2],2))};
