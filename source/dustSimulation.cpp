@@ -7,14 +7,15 @@
 #include <vector>
 #include <fstream>
 #include <fftw3.h>
+#include <random>
 
 using namespace std;
-#define ppc 100
-#define gridSize (1)
+#define ppc 1
+#define gridSize (50)
 #define gridDiv 50
 #define loopCount 2000
 #define G (6.6743*pow(10,-11))
-#define threads 12
+#define threads 6
 int main()
 {
     int particleCount = (ppc*pow((gridDiv),2));
@@ -51,10 +52,16 @@ int main()
     vector<vector<double>> dpsiy(gridDiv, vector<double> (gridDiv));
     //cout << "declared\n";
     cout << particleCount << "\n";
+    default_random_engine generator(time(NULL));
+    normal_distribution<double> normal(0,1);
+    double vth = sqrt(2);
+    
 
         for (int i = 0; i < particleCount; i++)                      //set particle position
         {
-            Particle temp( ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv), ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv),1,0.0,0.0);
+            double vx=vth*normal(generator);
+            double vy=vth*normal(generator);
+            Particle temp( ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv), ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv),1,vx,vy);
             //Particle temp( 2.5, 0,1,-0.1,0.0);
             dust.push_back(temp);
             //cout << dust[i].getX() << " " << dust[i].getY() << "\n";

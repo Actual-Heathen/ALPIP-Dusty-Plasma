@@ -26,6 +26,7 @@ Particle::Particle(long double x, long double y, long double m, double vx, doubl
     accelX = 0;
     accelY = 0;
     charge = 1;
+    speed = sqrt(pow(velX,2)+pow(velY,2));
 }
 
 void Particle::setX(long double x)
