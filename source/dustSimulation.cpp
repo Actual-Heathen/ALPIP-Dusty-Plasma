@@ -10,11 +10,10 @@
 #include <random>
 
 using namespace std;
-#define ppc 1
-#define gridSize (50)
-#define gridDiv 50
-#define loopCount 2000
-#define G (6.6743*pow(10,-11))
+#define ppc 50
+#define gridSize (100)
+#define gridDiv 100
+#define loopCount 1000
 #define threads 6
 int main()
 {
@@ -23,27 +22,29 @@ int main()
     double spacing = (double)gridSize/(double)(gridDiv);
     double E[3] = {0,0,0};
     double B[3] = {0,0,0};
-    double timeStep = .01;
+    double timeStep = .1;
     srand(time(NULL));                                          //seed random number generator
     double energy = 0;
     double meanRho = 0;
 
-    ofstream data;                                              //open data files
-    ofstream coor;
-    ofstream pointTime;
-    ofstream energyPlt;
-    ofstream energy2;
-    data.open("data/density.d");
-    coor.open("data/pointsF.d");
-    pointTime.open("data/pointTime.d");
-    energyPlt.open("data/energy.d");
-    energy2.open("data/energy2.d");
-    ofstream fou;                                              //open data files
+    ofstream density;                                              //open data files
+    //ofstream coor;
+    ofstream kEnergyF;
+    ofstream gEnergyF;
+    ofstream energyF;
+    ofstream fou;
     ofstream adj;
+    ofstream fp;
+    ofstream rhoS;
+    density.open("data/density.d");
+    //coor.open("data/pointsF.d");
+    kEnergyF.open("data/kEnergy.d");
+    gEnergyF.open("data/gEnergy.d");
+    energyF.open("data/energy.d");
     fou.open("data/fTransform.d");
     adj.open("data/aFTransform.d");
-    ofstream fp;                                              //open data files
     fp.open("data/psi.d");
+    rhoS.open("data/rhoS.d");
 
     vector<Particle> dust;                                      //declare dust and point grid
     vector<vector<double>> rho(gridDiv, vector<double> (gridDiv));
@@ -54,7 +55,7 @@ int main()
     cout << particleCount << "\n";
     default_random_engine generator(time(NULL));
     normal_distribution<double> normal(0,1);
-    double vth = sqrt(2);
+    double vth = 5;
     
 
         for (int i = 0; i < particleCount; i++)                      //set particle position
@@ -81,11 +82,6 @@ int main()
 
         p = fftw_plan_dft_2d(gridDiv,gridDiv,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
         r = fftw_plan_dft_2d(gridDiv,gridDiv,out,in,FFTW_BACKWARD,FFTW_ESTIMATE);
-
-        // snprintf(fn, sizeof fn, "../data/points%05d.d",l);
-        // ofstream points; points.open(fn);
-        // snprintf(fn, sizeof fn, "../data/density%05d.d",l);
-        // ofstream density; density.open(fn);
 
         //cout << "dec\n";
 
@@ -166,14 +162,14 @@ int main()
             {
                 //cout << rho[i][j] << "\n";
                 in[j+i*gridDiv][0] = rho[i][j];  //add rho to fftw input
-                data<<rho[j][i]<<"\n";
+                density<<rho[j][i]<<"\n";
                 in[j+i*gridDiv][1] = 0;
                 meanRho += pow(rho[i][j], 2);
-                //density << rho[j][i]<<"\n";                        //add grid values to file
             }
         }
 
         meanRho /= pow(gridDiv, 2);
+        rhoS << meanRho << "\n";
 
         fftw_execute(p);        //Execute the FFT
         //calculate Kx, Ky//
@@ -303,9 +299,9 @@ int main()
         fftw_free(out);
         energy = kEnergy + gEnergy;
         //cout << gEnergy<< ", "<< kEnergy << "\n";
-        energyPlt << timeStep*l<<" "<< energy <<"\n";
-        pointTime << timeStep*l<<" "<< gEnergy<<"\n";
-        energy2 << timeStep*l<<" "<< kEnergy<<"\n";
+        energyF << timeStep*l<<" "<< energy <<"\n";
+        gEnergyF << timeStep*l<<" "<< gEnergy<<"\n";
+        kEnergyF << timeStep*l<<" "<< kEnergy<<"\n";
         energy = 0;
         meanRho = 0;
 
@@ -313,10 +309,12 @@ int main()
 
     dust.clear();
     rho.clear();
-    data.close();
-    coor.close();
+    density.close();
+    kEnergyF.close();
+    gEnergyF.close();
+    energyF.close();
     fou.close();
-    fp.close();
     adj.close();
-    pointTime.close();
+    fp.close();
+    rhoS.close();
 }
