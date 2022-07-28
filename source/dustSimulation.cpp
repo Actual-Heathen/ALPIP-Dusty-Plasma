@@ -169,7 +169,7 @@ int main()
         }
 
         meanRho /= pow(gridDiv, 2);
-        rhoS << meanRho << "\n";
+        rhoS << timeStep*l <<" "<<meanRho << "\n";
 
         fftw_execute(p);        //Execute the FFT
         //calculate Kx, Ky//
