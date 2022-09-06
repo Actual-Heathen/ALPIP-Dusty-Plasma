@@ -72,7 +72,7 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
     double wXm = 1- abs((x_pos/spacing)-iXm);       //weight calculations
     double wXp = 1- abs((x_pos/spacing)-iXp);
 
-    if (iXp >= dpsix.size())                                 //adjust iXp if in "ghost region"
+    if ((double)iXp >= dpsix.size())                                 //adjust iXp if in "ghost region"
     {
         iXp = iXp - dpsix.size();
     }
@@ -85,7 +85,7 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
 
     //std::cout << dpsix[iXm][iYm] << "wXm\n"; 
 
-    if (iYp >= dpsiy.size())                                 //ghost region adjust
+    if ((double)iYp >= dpsiy.size())                                 //ghost region adjust
     {
         iYp = iYp - dpsiy.size();
     }
@@ -134,16 +134,11 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
     
 
     speed = sqrt(pow(velX,2) + pow(velY, 2) + pow(velZ, 2));
-
 }
 
 void Particle::move(double s, double size)
 {
 
-    accelX += velX * s;
-    accelY += velY * s;
-
-    
 
     x_pos += velX*s;
     y_pos += velY*s;

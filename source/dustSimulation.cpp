@@ -8,21 +8,22 @@
 #include <fstream>
 #include <fftw3.h>
 #include <random>
+#include <unistd.h>
 
 using namespace std;
-#define ppc 50
+#define ppc 100
 #define gridSize (100)
 #define gridDiv 100
 #define loopCount 1000
-#define threads 6
+#define threads 11
 int main()
 {
     int particleCount = (ppc*pow((gridDiv),2));
     //int particleCount = 25;
     double spacing = (double)gridSize/(double)(gridDiv);
     double E[3] = {0,0,0};
-    double B[3] = {0,0,0};
-    double timeStep = .1;
+    double B[3] = {0,10/sqrt(2),10/sqrt(2)};
+    double timeStep = .05;
     srand(time(NULL));                                          //seed random number generator
     double energy = 0;
     double meanRho = 0;
@@ -37,7 +38,6 @@ int main()
     ofstream fp;
     ofstream rhoS;
     density.open("data/density.d");
-    //coor.open("data/pointsF.d");
     kEnergyF.open("data/kEnergy.d");
     gEnergyF.open("data/gEnergy.d");
     energyF.open("data/energy.d");
@@ -51,11 +51,10 @@ int main()
     vector<vector<double>> psi(gridDiv, vector<double> (gridDiv));
     vector<vector<double>> dpsix(gridDiv, vector<double> (gridDiv));
     vector<vector<double>> dpsiy(gridDiv, vector<double> (gridDiv));
-    //cout << "declared\n";
     cout << particleCount << "\n";
     default_random_engine generator(time(NULL));
     normal_distribution<double> normal(0,1);
-    double vth = 5;
+    double vth = 1;
     
 
         for (int i = 0; i < particleCount; i++)                      //set particle position
@@ -70,7 +69,9 @@ int main()
     
     for (int l = 0; l< loopCount; l++)                          //main loop
     {
-        cout << l << "\n";
+        if (l%10 == 0)
+            cout << l << "\n";
+        
         double gEnergy = 0;
         double kEnergy = 0;
         energy = 0;
@@ -86,7 +87,6 @@ int main()
         //cout << "dec\n";
 
         #pragma omp parallel for num_threads(threads) schedule(static)
-        {
             for (int i = 0; i < gridDiv; i++)                       //initialize/reset  point grid
             {
                 for (int j = 0; j < gridDiv; j++)
@@ -95,7 +95,6 @@ int main()
                 }
 
             }
-        }
         //cout << "rho reset\n";
 
             for (int i = 0; i < particleCount; i++)                  //calculate rho
@@ -178,17 +177,18 @@ int main()
         Kx = (double*) malloc(sizeof(double)*gridDiv);
         Ky = (double*) malloc(sizeof(double)*gridDiv);
 
+        int test = ceil(gridDiv/2.0);
         #pragma omp parallel for num_threads(threads) schedule(static)
-        {
-            for (int i = 0; i < gridDiv/2.0; i++)
+            for (int i = 0; i < test ; i++)
             {
                 Kx[i] = (2*i*M_PI)/(gridSize);
                 Kx[gridDiv-1-i] = -(i+1)*(2*M_PI)/((gridSize));
                 Ky[i] = (2*i*M_PI)/(gridSize);
                 Ky[gridDiv-1-i] = -(i+1)*(2*M_PI)/((gridSize));
             }
-        }
 
+        out[0][0] = 0;
+        out[0][1] = 0;
         for (int i = 0; i < gridDiv; i++)
         {
             for (int j = 0; j < gridDiv; j++)
@@ -211,16 +211,13 @@ int main()
 		        
             }
         }
-        out[0][0] = 0;
-        out[0][1] = 0;
-        delete[] Kx;
-        delete[] Ky;
+        free(Kx);
+        free(Ky);
 
 
         fftw_execute(r);
 
         #pragma omp parallel for num_threads(threads) schedule(static)
-        {
             for (int i = 0; i < gridDiv;i++)
             {
                 for(int j = 0; j < gridDiv; j++)
@@ -229,7 +226,6 @@ int main()
                     
                 }
             }
-        }
 
         for (int i = 0; i < gridDiv; i++)
         {
@@ -275,7 +271,6 @@ int main()
         // }
 
         #pragma omp parallel for num_threads(threads) schedule(static)//define parallel section
-        {
             for (int i = 0; i < particleCount; i++)              //calculate gravity
             {
                 dust[i].addAcceleration(spacing, dpsix, dpsiy,E,B,timeStep);          //add Acceleration based on densities
@@ -289,8 +284,7 @@ int main()
                 // if ((work_done % 1000) == 0) //debugging couter
                 //     cout <<"number "<< work_done << "counted\n";
             }
-        }
-        //cout << "grav calc\n";
+
         //points.close();
         //density.close();
         fftw_destroy_plan(p);
@@ -298,6 +292,8 @@ int main()
         fftw_free(in);
         fftw_free(out);
         energy = kEnergy + gEnergy;
+        if (energy > 100000)
+            cout << energy<< "e\n";
         //cout << gEnergy<< ", "<< kEnergy << "\n";
         energyF << timeStep*l<<" "<< energy <<"\n";
         gEnergyF << timeStep*l<<" "<< gEnergy<<"\n";
