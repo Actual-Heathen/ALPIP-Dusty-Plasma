@@ -15,7 +15,7 @@ Particle::Particle()
     setMass(0);
 }
 
-Particle::Particle(long double x, long double y, long double m, double vx, double vy)
+Particle::Particle( double x,  double y,  double m, double vx, double vy)
 {
     setX(x);
     setY(y);
@@ -29,36 +29,36 @@ Particle::Particle(long double x, long double y, long double m, double vx, doubl
     speed = sqrt(pow(velX,2)+pow(velY,2));
 }
 
-void Particle::setX(long double x)
+void Particle::setX( double x)
 {
     x_pos = x;
 }
 
-void Particle::setY(long double y)
+void Particle::setY( double y)
 {
     y_pos = y;
 }
 
-void Particle::setMass(long double m)
+void Particle::setMass( double m)
 {
     mass = m;
 }
 
-long double Particle::getX()
+ double Particle::getX()
 {
     return x_pos;
 }
 
-long double Particle::getY()
+ double Particle::getY()
 {
     return y_pos;
 }
 
-long double Particle::getMass()
+ double Particle::getMass()
 {
     return mass;
 }
-long double Particle::getSpeed()
+ double Particle::getSpeed()
 {
     return speed;
 }

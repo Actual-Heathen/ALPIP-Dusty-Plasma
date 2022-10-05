@@ -15,18 +15,19 @@ using namespace std;
 #define gridSize (100)
 #define gridDiv 100
 #define loopCount 1000
-#define threads 11
+#define threads 16
 int main()
 {
     int particleCount = (ppc*pow((gridDiv),2));
     //int particleCount = 25;
     double spacing = (double)gridSize/(double)(gridDiv);
     double E[3] = {0,0,0};
-    double B[3] = {0,10/sqrt(2),10/sqrt(2)};
+    double B[3] = {0,1,1};
     double timeStep = .05;
     srand(time(NULL));                                          //seed random number generator
     double energy = 0;
     double meanRho = 0;
+    double lambda = 0;
 
     ofstream density;                                              //open data files
     //ofstream coor;
@@ -49,8 +50,11 @@ int main()
     vector<Particle> dust;                                      //declare dust and point grid
     vector<vector<double>> rho(gridDiv, vector<double> (gridDiv));
     vector<vector<double>> psi(gridDiv, vector<double> (gridDiv));
+    vector<vector<double>> phi(gridDiv, vector<double> (gridDiv));
     vector<vector<double>> dpsix(gridDiv, vector<double> (gridDiv));
     vector<vector<double>> dpsiy(gridDiv, vector<double> (gridDiv));
+    vector<vector<double>> dphix(gridDiv, vector<double> (gridDiv));
+    vector<vector<double>> dphiy(gridDiv, vector<double> (gridDiv));
     cout << particleCount << "\n";
     default_random_engine generator(time(NULL));
     normal_distribution<double> normal(0,1);
@@ -67,6 +71,20 @@ int main()
             //cout << dust[i].getX() << " " << dust[i].getY() << "\n";
         }
     
+    double *Kx;
+    double *Ky;
+    Kx = (double*) malloc(sizeof(double)*gridDiv);
+    Ky = (double*) malloc(sizeof(double)*gridDiv);
+
+    int test = ceil(gridDiv/2.0);
+    #pragma omp parallel for num_threads(threads) schedule(static)
+        for (int i = 0; i < test ; i++)
+        {
+            Kx[i] = (2*i*M_PI)/(gridSize);
+            Kx[gridDiv-1-i] = -(i+1)*(2*M_PI)/((gridSize));
+            Ky[i] = (2*i*M_PI)/(gridSize);
+            Ky[gridDiv-1-i] = -(i+1)*(2*M_PI)/((gridSize));
+        }
     for (int l = 0; l< loopCount; l++)                          //main loop
     {
         if (l%10 == 0)
@@ -77,12 +95,16 @@ int main()
         energy = 0;
         fftw_plan p;
         fftw_plan r;
+        fftw_plan phiR;
         fftw_complex *in, *out;
+        fftw_complex *phiIn, *phiOut;
         in = fftw_alloc_complex(gridDiv*gridDiv);
         out = fftw_alloc_complex(gridDiv*gridDiv);
-
+        phiIn = fftw_alloc_complex(gridDiv*gridDiv);
+        phiOut = fftw_alloc_complex(gridDiv*gridDiv);
         p = fftw_plan_dft_2d(gridDiv,gridDiv,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
         r = fftw_plan_dft_2d(gridDiv,gridDiv,out,in,FFTW_BACKWARD,FFTW_ESTIMATE);
+        phiR = fftw_plan_dft_2d(gridDiv, gridDiv, phiIn, phiOut, FFTW_BACKWARD, FFTW_ESTIMATE);
 
         //cout << "dec\n";
 
@@ -172,20 +194,6 @@ int main()
 
         fftw_execute(p);        //Execute the FFT
         //calculate Kx, Ky//
-        double *Kx;
-        double *Ky;
-        Kx = (double*) malloc(sizeof(double)*gridDiv);
-        Ky = (double*) malloc(sizeof(double)*gridDiv);
-
-        int test = ceil(gridDiv/2.0);
-        #pragma omp parallel for num_threads(threads) schedule(static)
-            for (int i = 0; i < test ; i++)
-            {
-                Kx[i] = (2*i*M_PI)/(gridSize);
-                Kx[gridDiv-1-i] = -(i+1)*(2*M_PI)/((gridSize));
-                Ky[i] = (2*i*M_PI)/(gridSize);
-                Ky[gridDiv-1-i] = -(i+1)*(2*M_PI)/((gridSize));
-            }
 
         out[0][0] = 0;
         out[0][1] = 0;
@@ -198,24 +206,32 @@ int main()
                 fou << temp << "\n";
                 //cout << temp << "\n";
 		        double tempC = out[i*gridDiv+j][1];
+
+                double tempPhi = temp;
+                double tempPhiC = temp;
+
                 if (Ky[j] != 0 || Kx[i] != 0)
                 {
                     temp = temp/(pow(Ky[j],2)+pow(Kx[i],2));
                     tempC = tempC/(pow(Ky[j],2)+pow(Kx[i],2));
+
+                    tempPhi = tempPhi/(pow(Ky[j],2)+pow(Kx[i],2)-lambda);
+                    tempPhiC = tempPhiC/(pow(Ky[j],2)+pow(Kx[i],2)-lambda);
                 }
 
 
 		        out[i*gridDiv +j][0] = temp;
+                phiIn[i*gridDiv +j][0] = tempPhi;
                 adj << temp<<"\n";
 		        out[i*gridDiv+j][1] = tempC;
+                phiIn[i*gridDiv+j][1] = tempPhiC;
 		        
             }
         }
-        free(Kx);
-        free(Ky);
 
 
         fftw_execute(r);
+        fftw_execute(phiR);
 
         #pragma omp parallel for num_threads(threads) schedule(static)
             for (int i = 0; i < gridDiv;i++)
@@ -223,7 +239,7 @@ int main()
                 for(int j = 0; j < gridDiv; j++)
                 {
                     psi[i][j] = in[i*gridDiv+j][0]/pow(gridDiv,2);
-                    
+                    phi[i][j] = phiOut[i*gridDiv+j][0]/pow(gridDiv,2);
                 }
             }
 
@@ -251,6 +267,9 @@ int main()
 
                 dpsix[i][j] = ((psi[xp][j]-psi[xm][j]))/(2*spacing);
                 dpsiy[i][j] = ((psi[i][yp]-psi[i][ym]))/(2*spacing);
+
+                dphix[i][j] = ((phi[xp][j]-phi[xm][j]))/(2*spacing);
+                dphiy[i][j] = ((phi[i][yp]-phi[i][ym]))/(2*spacing);
                 fp<< psi[j][i]<<"\n";
                 gEnergy += (-0.5*rho[i][j]*psi[i][j]);
             }
