@@ -27,7 +27,7 @@ int main()
     srand(time(NULL));                                          //seed random number generator
     double energy = 0;
     double meanRho = 0;
-    double lambda = 0;
+    double lambda = .12;
 
     ofstream density;                                              //open data files
     //ofstream coor;
@@ -215,8 +215,8 @@ int main()
                     temp = temp/(pow(Ky[j],2)+pow(Kx[i],2));
                     tempC = tempC/(pow(Ky[j],2)+pow(Kx[i],2));
 
-                    tempPhi = tempPhi/(pow(Ky[j],2)+pow(Kx[i],2)-lambda);
-                    tempPhiC = tempPhiC/(pow(Ky[j],2)+pow(Kx[i],2)-lambda);
+                    tempPhi = tempPhi/(pow(Ky[j],2)+pow(Kx[i],2)-pow(lambda,-2));
+                    tempPhiC = tempPhiC/(pow(Ky[j],2)+pow(Kx[i],2)-pow(lambda,-2));
                 }
 
 
