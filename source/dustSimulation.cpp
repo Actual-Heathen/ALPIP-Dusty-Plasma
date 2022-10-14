@@ -15,7 +15,7 @@ using namespace std;
 #define gridSize (100)
 #define gridDiv 100
 #define loopCount 1000
-#define threads 16
+#define threads 50
 int main()
 {
     int particleCount = (ppc*pow((gridDiv),2));
@@ -292,14 +292,11 @@ int main()
         #pragma omp parallel for num_threads(threads) schedule(static)//define parallel section
             for (int i = 0; i < particleCount; i++)              //calculate gravity
             {
-                dust[i].addAcceleration(spacing, dpsix, dpsiy,E,B,timeStep);          //add Acceleration based on densities
+                dust[i].addAcceleration(spacing, dpsix, dpsiy, dphix, dphiy, E,B,timeStep);          //add Acceleration based on densities
                 //cout<<"accel\n";
                 dust[i].move(timeStep, gridSize);              //move particle
                 //cout<<"move\n";
 		        //cout <<"moved\n";
-                #pragma omp atomic
-                work_done++;
-                
                 // if ((work_done % 1000) == 0) //debugging couter
                 //     cout <<"number "<< work_done << "counted\n";
             }

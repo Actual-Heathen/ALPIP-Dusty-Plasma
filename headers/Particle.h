@@ -10,7 +10,7 @@ class Particle
          double getY();
          double getMass();
          double getSpeed();
-        void addAcceleration(double spacing, std::vector<std::vector<double>> dpsix, std::vector<std::vector<double>> dpsiy, double E[3], double B[3], double time);
+        void addAcceleration(double spacing, std::vector<std::vector<double>> dpsix, std::vector<std::vector<double>> dpsiy,std::vector<std::vector<double>> dphix,std::vector<std::vector<double>> dphiy, double E[3], double B[3], double time);
         void move(double s, double size);
         void resetAcc();
         void resetVel();

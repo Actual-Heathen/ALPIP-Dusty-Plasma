@@ -63,7 +63,7 @@ void Particle::setMass( double m)
     return speed;
 }
 
-void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> dpsix, std::vector<std::vector<double>> dpsiy, double E[3], double B[3], double time)
+void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> dpsix, std::vector<std::vector<double>> dpsiy, std::vector<std::vector<double>> dphix, std::vector<std::vector<double>> dphiy, double E[3], double B[3], double time)
 {
 
     int iXm = floor(x_pos/spacing);                 //calculate iXm & iXp
@@ -94,42 +94,57 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
 
     double dX = wXm*wYm*dpsix[iXm][iYm];
     double dY = wXm*wYm*dpsiy[iXm][iYm];
+    double dPX = wXm*wYm*dphix[iXm][iYm];
+    double dPY = wXm*wYm*dphiy[iXm][iYm];
 
     accelX = dX;
     accelY = dY;
+    double electricX = dPX;
+    double electricY = dPY;
     //std::cout <<"mm\n";
 
     dX = wXm*wYp*dpsix[iXm][iYp];
     dY = wXm*wYp*dpsiy[iXm][iYp];
+    dPX = wXm*wYp*dphix[iXm][iYp];
+    dPY = wXm*wYp*dphiy[iXm][iYp];
 
     accelX += dX;
     accelY += dY;
+    electricX += dPX;
+    electricY += dPY;
 
     //std::cout <<"mp\n";
 
-
     dX = wXp*wYm*dpsix[iXp][iYm];
     dY = wXp*wYm*dpsiy[iXp][iYm];
+    dPX = wXp*wYm*dphix[iXp][iYm];
+    dPY = wXp*wYm*dphiy[iXp][iYm];
 
     accelX += dX;
     accelY += dY;
+    electricX += dPX;
+    electricY += dPY;
 
     //std::cout <<"pm\n";
 
     dX = wXp*wYp*dpsix[iXp][iYp];
     dY = wXp*wYp*dpsiy[iXp][iYp];
+    dPX = wXp*wYp*dphix[iXp][iYp];
+    dPY = wXp*wYp*dphiy[iXp][iYp];
 
     accelX += dX;
     accelY += dY;
+    electricX += dPX;
+    electricY += dPY;
 
-    double vM[3] = {velX + ((charge/mass)*E[0]+accelX)*(time/2), velY + ((charge/mass)*E[1]+accelY)*(time/2),velZ + ((charge/mass)*E[2]+accelZ)*(time/2)};
+    double vM[3] = {velX + ((charge/mass)*(E[0]+electricX)+accelX)*(time/2), velY + ((charge/mass)*(E[1]+electricY)+accelY)*(time/2),velZ + ((charge/mass)*E[2]+accelZ)*(time/2)};
     double T[3] = {(charge/mass)*B[0]*(time/2),(charge/mass)*B[1]*(time/2),(charge/mass)*B[2]*(time/2)};
     double vS[3] = {vM[0]+vM[1]*T[2]-vM[2]*T[1], vM[1]+vM[2]*T[0]-vM[0]*T[2], vM[2]+vM[0]*T[1]-vM[1]*T[0]};
     double S[3] = {(2*T[0])/(1+pow(T[0],2)+pow(T[1],2)+pow(T[2],2)), (2*T[1])/(1+pow(T[0],2)+pow(T[1],2)+pow(T[2],2)), (2*T[2])/(1+pow(T[0],2)+pow(T[1],2)+pow(T[2],2))};
     double vP[3] = {vM[0]+vS[1]*S[2]-vS[2]*S[1], vM[1]+vS[2]*S[0]-vS[0]*S[2], vM[2]+vS[0]*S[1]-vS[1]*S[0]};
 
-    velX = vP[0] + (charge/mass)*(E[0]+accelX)*(time/2);
-    velY = vP[1] + (charge/mass)*(E[1]+accelY)*(time/2);
+    velX = vP[0] + (charge/mass)*(E[0]+accelX)*(time/2) + (charge/mass)*(electricX+accelX)*(time/2);
+    velY = vP[1] + (charge/mass)*(E[1]+accelY)*(time/2) + (charge/mass)*(electricY+accelX)*(time/2);
     velZ = vP[2] + (charge/mass)*(E[2]+accelZ)*(time/2);
     
 
