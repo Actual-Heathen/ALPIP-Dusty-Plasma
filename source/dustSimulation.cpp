@@ -15,7 +15,7 @@ using namespace std;
 #define gridSize (100)
 #define gridDiv 100
 #define loopCount 1000
-#define threads 50
+#define threads 16
 int main()
 {
     int particleCount = (ppc*pow((gridDiv),2));
@@ -27,7 +27,7 @@ int main()
     srand(time(NULL));                                          //seed random number generator
     double energy = 0;
     double meanRho = 0;
-    double lambda = .12;
+    double lambda = 1;
 
     ofstream density;                                              //open data files
     //ofstream coor;
@@ -208,7 +208,7 @@ int main()
 		        double tempC = out[i*gridDiv+j][1];
 
                 double tempPhi = temp;
-                double tempPhiC = temp;
+                double tempPhiC = tempC;
 
                 if (Ky[j] != 0 || Kx[i] != 0)
                 {

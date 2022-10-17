@@ -99,8 +99,8 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
 
     accelX = dX;
     accelY = dY;
-    double electricX = dPX;
-    double electricY = dPY;
+    double electricX = -1*dPX;
+    double electricY = -1*dPY;
     //std::cout <<"mm\n";
 
     dX = wXm*wYp*dpsix[iXm][iYp];
@@ -110,8 +110,8 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
 
     accelX += dX;
     accelY += dY;
-    electricX += dPX;
-    electricY += dPY;
+    electricX -= dPX;
+    electricY -= dPY;
 
     //std::cout <<"mp\n";
 
@@ -122,8 +122,8 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
 
     accelX += dX;
     accelY += dY;
-    electricX += dPX;
-    electricY += dPY;
+    electricX -= dPX;
+    electricY -= dPY;
 
     //std::cout <<"pm\n";
 
@@ -134,8 +134,8 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
 
     accelX += dX;
     accelY += dY;
-    electricX += dPX;
-    electricY += dPY;
+    electricX -= dPX;
+    electricY -= dPY;
 
     double vM[3] = {velX + ((charge/mass)*(E[0]+electricX)+accelX)*(time/2), velY + ((charge/mass)*(E[1]+electricY)+accelY)*(time/2),velZ + ((charge/mass)*E[2]+accelZ)*(time/2)};
     double T[3] = {(charge/mass)*B[0]*(time/2),(charge/mass)*B[1]*(time/2),(charge/mass)*B[2]*(time/2)};
