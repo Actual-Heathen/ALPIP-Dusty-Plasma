@@ -22,7 +22,7 @@ int main()
     //int particleCount = 25;
     double spacing = (double)gridSize/(double)(gridDiv);
     double E[3] = {0,0,0};
-    double B[3] = {0,1,1};
+    double B[3] = {0,0,0};
     double timeStep = .05;
     srand(time(NULL));                                          //seed random number generator
     double energy = 0;
