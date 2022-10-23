@@ -203,7 +203,7 @@ int main()
             {
                 //cout << rho[i][j] << "\n";
                 double temp = out[i*gridDiv+j][0];
-                fou << temp << "\n";
+                //fou << temp << "\n";
                 //cout << temp << "\n";
 		        double tempC = out[i*gridDiv+j][1];
 
@@ -215,8 +215,8 @@ int main()
                     temp = temp/(pow(Ky[j],2)+pow(Kx[i],2));
                     tempC = tempC/(pow(Ky[j],2)+pow(Kx[i],2));
 
-                    tempPhi = tempPhi/(pow(Ky[j],2)+pow(Kx[i],2)-pow(lambda,-2));
-                    tempPhiC = tempPhiC/(pow(Ky[j],2)+pow(Kx[i],2)-pow(lambda,-2));
+                    tempPhi = tempPhi/(pow(Ky[j],2)+pow(Kx[i],2)+(pow(lambda,-2)));
+                    tempPhiC = tempPhiC/(pow(Ky[j],2)+pow(Kx[i],2)+(pow(lambda,-2)));
                 }
 
 
@@ -271,6 +271,7 @@ int main()
                 dphix[i][j] = ((phi[xp][j]-phi[xm][j]))/(2*spacing);
                 dphiy[i][j] = ((phi[i][yp]-phi[i][ym]))/(2*spacing);
                 fp<< psi[j][i]<<"\n";
+                fou<<phi[j][i]<<"\n";
                 gEnergy += (-0.5*rho[i][j]*psi[i][j]);
             }
 	    }
