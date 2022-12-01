@@ -22,7 +22,7 @@ int main()
     //int particleCount = 25;
     double spacing = (double)gridSize/(double)(gridDiv);
     double E[3] = {0,0,0};
-    double B[3] = {0,0,0};
+    double B[3] = {0,0,1};
     double timeStep = .05;
     srand(time(NULL));                                          //seed random number generator
     double energy = 0;
@@ -280,8 +280,6 @@ int main()
         //cout << "rho counted\n";
 
         //cout << rhoTemp << " rho sum\n";                      //debugging//
-
-        int work_done = 0;  //in paralell serial counter
 
         // for (int i = 0; i < particleCount; i++)
         // {
