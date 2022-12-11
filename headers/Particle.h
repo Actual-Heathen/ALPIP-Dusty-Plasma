@@ -5,18 +5,18 @@ class Particle
 {
     public:
         Particle();
-        Particle(long double x, long double y, long double m, double vx, double vy);
-        long double getX();
-        long double getY();
-        long double getMass();
-        long double getSpeed();
-        void addAcceleration(double spacing, std::vector<std::vector<double>> dpsix, std::vector<std::vector<double>> dpsiy, double E[3], double B[3], double time);
+        Particle( double x,  double y,  double m, double vx, double vy);
+         double getX();
+         double getY();
+         double getMass();
+         double getSpeed();
+        void addAcceleration(double spacing, std::vector<std::vector<double>> dpsix, std::vector<std::vector<double>> dpsiy,std::vector<std::vector<double>> dphix,std::vector<std::vector<double>> dphiy, double E[3], double B[3], double time);
         void move(double s, double size);
         void resetAcc();
         void resetVel();
-        void setX(long double x);
-        void setY(long double y);
-        void setMass(long double m);
+        void setX( double x);
+        void setY( double y);
+        void setMass( double m);
     private:
 
         double x_pos;
