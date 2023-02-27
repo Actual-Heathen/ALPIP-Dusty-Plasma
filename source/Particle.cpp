@@ -15,7 +15,7 @@ Particle::Particle()
     setMass(0);
 }
 
-Particle::Particle( double x,  double y,  double m, double vx, double vy)
+Particle::Particle( double x,  double y,  double m, double vx, double vy, double WpdR, double WcdR)
 {
     setX(x);
     setY(y);
@@ -27,6 +27,8 @@ Particle::Particle( double x,  double y,  double m, double vx, double vy)
     accelY = 0;
     charge = 1;
     speed = sqrt(pow(velX,2)+pow(velY,2));
+    Wpd_wjd = WpdR;
+    Wcd_wjd = WcdR;
 }
 
 void Particle::setX( double x)
@@ -134,10 +136,10 @@ void Particle::addAcceleration(double spacing, std::vector<std::vector<double>> 
 
     accelX += dX;
     accelY += dY;
-    electricX -= dPX;
-    electricY -= dPY;
+    electricX -= dPX*pow(Wpd_wjd,2);
+    electricY -= dPY*pow(Wpd_wjd,2);
 
-    double vM[3] = {velX + ((charge/mass)*(E[0]+electricX)+accelX)*(time/2), velY + ((charge/mass)*(E[1]+electricY)+accelY)*(time/2),velZ + ((charge/mass)*E[2]+accelZ)*(time/2)};
+    double vM[3] = {(velX*Wcd_wjd) + ((charge/mass)*(E[0]+electricX)+accelX)*(time/2), (velY*Wcd_wjd) + ((charge/mass)*(E[1]+electricY)+accelY)*(time/2),(velZ*Wcd_wjd) + ((charge/mass)*E[2]+accelZ)*(time/2)};
     double T[3] = {(charge/mass)*B[0]*(time/2),(charge/mass)*B[1]*(time/2),(charge/mass)*B[2]*(time/2)};
     double vS[3] = {vM[0]+vM[1]*T[2]-vM[2]*T[1], vM[1]+vM[2]*T[0]-vM[0]*T[2], vM[2]+vM[0]*T[1]-vM[1]*T[0]};
     double S[3] = {(2*T[0])/(1+pow(T[0],2)+pow(T[1],2)+pow(T[2],2)), (2*T[1])/(1+pow(T[0],2)+pow(T[1],2)+pow(T[2],2)), (2*T[2])/(1+pow(T[0],2)+pow(T[1],2)+pow(T[2],2))};

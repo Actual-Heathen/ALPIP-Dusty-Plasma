@@ -15,19 +15,44 @@ using namespace std;
 #define gridSize (100)
 #define gridDiv 100
 #define loopCount 1000
-#define threads 16
+#define threads 8
+#define n_e  (pow(10,15))
+#define n_d (pow(10,9))
+#define G (6.743 * pow(10,-11))
+#define m_d (pow(10,-15))
+#define e_0 (8.8542*pow(10,-12))
+#define T_e 2.5
+#define k_b (1.6022*pow(10,-19))
+#define q_d (1000*k_b)
+
+
+
 int main()
 {
     int particleCount = (ppc*pow((gridDiv),2));
     //int particleCount = 25;
     double spacing = (double)gridSize/(double)(gridDiv);
     double E[3] = {0,0,0};
-    double B[3] = {0,0,1};
+    double B[3] = {0,0,5};
     double timeStep = .05;
     srand(time(NULL));                                          //seed random number generator
     double energy = 0;
     double meanRho = 0;
     double lambda = 1;
+
+    //ratio calculations
+    double W_pd_pre = (n_d*q_d*q_d)/(e_0*m_d);
+    double W_pd = 5; //pow(W_pd_pre,0.5)*2;
+    double B_mag = 5;
+    double W_cd = (q_d*B_mag)/m_d;
+    double w_jd = pow((4*M_PI*G*m_d*n_d),1/2);
+    double l_de = pow((e_0*k_b*T_e)/(n_e*k_b*k_b),0.5);
+    lambda = l_de;
+
+    double Wpd_wjd = (W_pd/w_jd);
+    double Wcd_wjd = (W_cd/w_jd);
+
+    //cout << "RATIOS: " <<Wpd_wjd<< ",  "<<Wcd_wjd<<", "<<lambda<<" pd,cd\n";
 
     ofstream density;                                              //open data files
     //ofstream coor;
@@ -58,14 +83,14 @@ int main()
     cout << particleCount << "\n";
     default_random_engine generator(time(NULL));
     normal_distribution<double> normal(0,1);
-    double vth = 1;
+    double vth = T_e;
     
 
         for (int i = 0; i < particleCount; i++)                      //set particle position
         {
             double vx=vth*normal(generator);
             double vy=vth*normal(generator);
-            Particle temp( ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv), ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv),1,vx,vy);
+            Particle temp( ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv), ((double)rand()/(double)RAND_MAX)*spacing*(gridDiv),1,vx,vy,Wpd_wjd,Wcd_wjd);
             //Particle temp( 2.5, 0,1,-0.1,0.0);
             dust.push_back(temp);
             //cout << dust[i].getX() << " " << dust[i].getY() << "\n";

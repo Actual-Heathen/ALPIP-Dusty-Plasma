@@ -5,7 +5,7 @@ class Particle
 {
     public:
         Particle();
-        Particle( double x,  double y,  double m, double vx, double vy);
+        Particle(double x,  double y,  double m, double vx, double vy, double WpdR,double WcdR);
          double getX();
          double getY();
          double getMass();
@@ -31,4 +31,6 @@ class Particle
         double accelY = 0;
         double accelZ = 0;
         double charge;
+        double Wpd_wjd;
+        double Wcd_wjd;
 };
